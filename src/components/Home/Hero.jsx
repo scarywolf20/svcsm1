@@ -126,6 +126,13 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
+             <a
+                href="/brochures/Inter%20Scholarship%20Form.pdf"
+                download="Inter Scholarship Form.pdf"
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-bold text-lg transition-all flex items-center gap-2"
+            >
+              <Download size={20} />Scholarship Form
+            </a>
             <button 
                 onClick={() => navigate('/admissions/process')}
                 className="bg-sv-maroon hover:bg-red-800 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-xl shadow-red-900/40 flex items-center gap-2 group"
@@ -140,6 +147,13 @@ const Hero = () => {
             >
               <Download size={20} /> Download Brochure
             </a>
+            {/* <a
+                href="/brochures/Inter%20Scholarship%20Form.pdf"
+                download="Inter Scholarship Form.pdf"
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-bold text-lg transition-all flex items-center gap-2"
+            >
+              <Download size={20} />Scholarship Form
+            </a> */}
           </div>
         </MotionDiv>
       </div>
