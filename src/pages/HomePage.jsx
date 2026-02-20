@@ -15,7 +15,7 @@ const HomePage = () => {
       <SEO 
         title="Home" 
         description="Swami Vivekananda Composite School & Junior College - Providing quality education in Arts, Commerce, and Science with state-of-the-art facilities."
-        keywords="school, junior college, education, nashik, arts, commerce, science, best college"
+        keywords="school, junior college, education, nashik, arts, commerce, science, best college,svicsm, svicsm nashik, svicsm college, svicsm school, svicsm junior college"
       />
       <Hero />
       <About />

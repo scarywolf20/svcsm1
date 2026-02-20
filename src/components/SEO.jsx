@@ -2,7 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const SEO = ({ title, description, keywords, image, url, type = 'website' }) => {
-  const siteTitle = 'SVICSM - Swami Vivekananda Institute of Commerce, Science & Management';
+  const siteTitle = 'SVICSM - Swami Vivekananda Institute of Commerce, Science & Management ';
   const defaultDescription = 'Leading educational institution in Nashik offering Junior & Senior College programs in Commerce, Science, and Management. NEP2020 compliant with focus on holistic development.';
 const defaultImage = 'https://svicsm.com/logo.png';
   const defaultUrl = 'https://svicsm.com';
