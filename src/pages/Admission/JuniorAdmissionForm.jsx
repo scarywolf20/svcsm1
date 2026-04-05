@@ -62,6 +62,50 @@ const JuniorAdmissionForm = () => {
       oneTime: 32500,
       inst1: 20000,
       inst2: 15000
+    },
+    '11thArts': {
+      name: '11th Arts',
+      admission: 1000,
+      tuition: 7000,
+      coActivity: 3000,
+      exam: 1000,
+      total: 12000,
+      oneTime: 11000,
+      inst1: 6000,
+      inst2: 6000
+    },
+    '12thArts': {
+      name: '12th Arts',
+      admission: 1000,
+      tuition: 7000,
+      coActivity: 3000,
+      exam: 1000,
+      total: 12000,
+      oneTime: 11000,
+      inst1: 6000,
+      inst2: 6000
+    },
+    '11thCET': {
+      name: '11th CET Batch',
+      admission: 1000,
+      tuition: 45000,
+      coActivity: 6000,
+      exam: 3000,
+      total: 55000,
+      oneTime: 52500,
+      inst1: 30000,
+      inst2: 25000
+    },
+    '12thCET': {
+      name: '12th CET Batch',
+      admission: 1000,
+      tuition: 45000,
+      coActivity: 6000,
+      exam: 3000,
+      total: 55000,
+      oneTime: 52500,
+      inst1: 30000,
+      inst2: 25000
     }
   };
 
@@ -85,6 +129,16 @@ const JuniorAdmissionForm = () => {
       oneTime: 37500,
       inst1: 25000,
       inst2: 15000
+    },
+    'Arts': {
+      admission: 1000,
+      tuition: 10000,
+      coActivity: 3000,
+      exam: 1000,
+      total: 15000,
+      oneTime: 14000,
+      inst1: 8000,
+      inst2: 7000
     }
   };
 
@@ -110,7 +164,7 @@ const JuniorAdmissionForm = () => {
          }
       }
 
-      const courseKey = `${selectedStandard}${selectedStream === 'Science' ? 'Sci' : 'Com'}`;
+      const courseKey = `${selectedStandard}${selectedStream === 'Science' ? 'Sci' : selectedStream === 'Commerce' ? 'Com' : selectedStream === 'Arts' ? 'Arts' : 'CET'}`;
       return feeStructure[courseKey];
     }
     return null;
@@ -150,9 +204,23 @@ const JuniorAdmissionForm = () => {
     if (selectedStream === 'Science') {
       data.streamScience = true;
       data.streamCommerce = false;
-    } else {
+      data.streamArts = false;
+      data.streamCET = false;
+    } else if (selectedStream === 'Commerce') {
       data.streamCommerce = true;
       data.streamScience = false;
+      data.streamArts = false;
+      data.streamCET = false;
+    } else if (selectedStream === 'Arts') {
+      data.streamArts = true;
+      data.streamCommerce = false;
+      data.streamScience = false;
+      data.streamCET = false;
+    } else if (selectedStream === 'CET') {
+       data.streamCET = true;
+       data.streamArts = false;
+       data.streamCommerce = false;
+       data.streamScience = false;
     }
 
     const combinedFields = {
@@ -431,7 +499,7 @@ const JuniorAdmissionForm = () => {
                     {/* Stream Selection */}
                     <div>
                       <label className="block text-sm font-bold mb-3 text-gray-700">Stream/Subject *</label>
-                      <div className="flex gap-8 md:gap-12">
+                      <div className="flex flex-wrap gap-8 md:gap-12">
                         <label className="flex items-center gap-3 cursor-pointer">
                           <input 
                             type="radio" 
@@ -452,6 +520,26 @@ const JuniorAdmissionForm = () => {
                           />
                           <span className="text-gray-800 font-bold text-lg">Commerce</span>
                         </label>
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input 
+                            type="radio" 
+                            value="Arts"
+                            {...register("stream", { required: "Please select a stream" })}
+                            className="w-6 h-6 cursor-pointer"
+                            style={{ accentColor: '#B8860B' }}
+                          />
+                          <span className="text-gray-800 font-bold text-lg">Arts</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input 
+                            type="radio" 
+                            value="CET"
+                            {...register("stream", { required: "Please select a stream" })}
+                            className="w-6 h-6 cursor-pointer"
+                            style={{ accentColor: '#B8860B' }}
+                          />
+                          <span className="text-gray-800 font-bold text-lg">CET Batch</span>
+                        </label>
                       </div>
                       {errors.stream && <p className="text-red-600 text-xs mt-2">{errors.stream.message}</p>}
                     </div>
@@ -471,6 +559,7 @@ const JuniorAdmissionForm = () => {
                     </div>
 
                     {/* Hybrid Checkbox */}
+                    {selectedStream !== 'CET' && (
                     <div>
                        <label className="flex items-center gap-2 cursor-pointer p-4 rounded-lg bg-orange-50 border-2" style={{ borderColor: '#B8860B' }}>
                           <input 
@@ -485,6 +574,7 @@ const JuniorAdmissionForm = () => {
                           </div>
                        </label>
                     </div>
+                    )}
 
                     {/* Photo Upload */}
                     <div>

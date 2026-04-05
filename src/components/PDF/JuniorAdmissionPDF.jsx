@@ -436,13 +436,17 @@ const JuniorAdmissionPDF = ({ data }) => {
   // Get fee structure based on selected course
   const getFeeStructure = () => {
     const standard = data.standard;
-    const stream = data.streamScience ? 'Science' : 'Commerce';
+    const stream = data.streamScience ? 'Science' : data.streamCommerce ? 'Commerce' : data.streamArts ? 'Arts' : 'CET';
     
     const fees = {
       '11thCom': { admission: 1000, tuition: 14500, coActivity: 3000, exam: 3000, total: 21500, oneTime: 20000, inst1: 11500, inst2: 10000 },
       '12thCom': { admission: 1000, tuition: 14500, coActivity: 3000, exam: 3000, total: 21500, oneTime: 20000, inst1: 11500, inst2: 10000 },
       '11thSci': { admission: 1000, tuition: 25000, coActivity: 6000, exam: 3000, total: 35000, oneTime: 32500, inst1: 20000, inst2: 15000 },
-      '12thSci': { admission: 1000, tuition: 25000, coActivity: 6000, exam: 3000, total: 35000, oneTime: 32500, inst1: 20000, inst2: 15000 }
+      '12thSci': { admission: 1000, tuition: 25000, coActivity: 6000, exam: 3000, total: 35000, oneTime: 32500, inst1: 20000, inst2: 15000 },
+      '11thArts': { admission: 1000, tuition: 7000, coActivity: 3000, exam: 1000, total: 12000, oneTime: 11000, inst1: 6000, inst2: 6000 },
+      '12thArts': { admission: 1000, tuition: 7000, coActivity: 3000, exam: 1000, total: 12000, oneTime: 11000, inst1: 6000, inst2: 6000 },
+      '11thCET': { admission: 1000, tuition: 45000, coActivity: 6000, exam: 3000, total: 55000, oneTime: 52500, inst1: 30000, inst2: 25000 },
+      '12thCET': { admission: 1000, tuition: 45000, coActivity: 6000, exam: 3000, total: 55000, oneTime: 52500, inst1: 30000, inst2: 25000 }
     };
 
     const hybridFees = {
@@ -465,6 +469,16 @@ const JuniorAdmissionPDF = ({ data }) => {
         oneTime: 37500,
         inst1: 25000,
         inst2: 15000
+      },
+      'Arts': {
+        admission: 1000,
+        tuition: 10000,
+        coActivity: 3000,
+        exam: 1000,
+        total: 15000,
+        oneTime: 14000,
+        inst1: 8000,
+        inst2: 7000
       }
     };
 
@@ -473,7 +487,7 @@ const JuniorAdmissionPDF = ({ data }) => {
        if (fees) return fees;
     }
 
-    const courseKey = `${standard}${stream === 'Science' ? 'Sci' : 'Com'}`;
+    const courseKey = `${standard}${stream === 'Science' ? 'Sci' : stream === 'Commerce' ? 'Com' : stream === 'Arts' ? 'Arts' : 'CET'}`;
     return fees[courseKey] || fees['11thCom'];
   };
 
@@ -517,7 +531,7 @@ const JuniorAdmissionPDF = ({ data }) => {
         </View>
 
         <Text style={styles.formTitle}>
-          Swami Vivekananda Institute of Arts, Commerce & Science, Pimpalgaon Baswant, Nashik {data.isHybrid ? '(HYBRID MODE)' : ''}
+          Swami Vivekananda Institute of Arts, Commerce & Science, Pimpalgaon Baswant, Nashik {data.streamCET ? '(CET BATCH)' : data.isHybrid ? '(HYBRID MODE)' : ''}
         </Text>
         <Text style={styles.formFees}>Form Fees: Rs. 100/-</Text>
 
@@ -543,11 +557,19 @@ const JuniorAdmissionPDF = ({ data }) => {
             <View style={data.streamCommerce ? styles.checkedBox : styles.checkbox} />
             <Text style={styles.checkboxLabel}>Commerce</Text>
           </View>
+          <View style={styles.courseItem}>
+            <View style={data.streamArts ? styles.checkedBox : styles.checkbox} />
+            <Text style={styles.checkboxLabel}>Arts</Text>
+          </View>
+          <View style={styles.courseItem}>
+            <View style={data.streamCET ? styles.checkedBox : styles.checkbox} />
+            <Text style={styles.checkboxLabel}>CET</Text>
+          </View>
 
           <View style={data.boardStateBoard ? styles.checkedBox : styles.checkbox} />
           <Text style={{ fontSize: 9, marginLeft: 4 }}>State Board</Text>
 
-          {data.isHybrid && (
+          {data.isHybrid && !data.streamCET && (
             <View style={{ ...styles.courseItem, marginLeft: 10 }}>
               <View style={styles.checkedBox} />
               <Text style={{ ...styles.checkboxLabel, fontFamily: 'Times-Bold', color: '#800020' }}>HYBRID MODE</Text>
