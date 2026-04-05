@@ -25,6 +25,24 @@ const feeData = [
         // Theme: Orange (Matches Commerce in Curriculum)
         color: "bg-gradient-to-r from-orange-500 to-red-500",
         features: ["Tuition Fee: ₹14,500", "Admission Fee: ₹1,000", "Co-curricular: ₹3,000", "Exam Fee: ₹3,000"]
+      },
+      {
+        name: "Arts Stream",
+        code: "11ARTS / 12ARTS",
+        total: "₹ 12,000",
+        oneTime: "₹ 11,000",
+        // Theme: Teal (Matches Arts Theme)
+        color: "bg-gradient-to-r from-teal-500 to-emerald-600",
+        features: ["Tuition Fee: ₹7,000", "Admission Fee: ₹1,000", "Co-curricular: ₹3,000", "Exam Fee: ₹1,000"]
+      },
+      {
+        name: "CET Batch (MHT-CET/JEE)",
+        code: "11CET / 12CET",
+        total: "₹ 55,000",
+        oneTime: "₹ 52,500",
+        // Theme: Deep Blue / Purple (Special Mode)
+        color: "bg-gradient-to-r from-blue-700 to-indigo-800",
+        features: ["Tuition Fee: ₹45,000", "Admission Fee: ₹1,000", "Co-curricular: ₹6,000", "Exam Fee: ₹3,000"]
       }
     ]
   },
