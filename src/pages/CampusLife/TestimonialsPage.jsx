@@ -6,7 +6,7 @@ import { collection, addDoc, getDocs, query, where, serverTimestamp, orderBy } f
 import { db } from '../../firebase';
 import SEO from '../../components/SEO';
 
-const CLOUDINARY_CLOUD_NAME = 'dh4xushgf';
+const CLOUDINARY_CLOUD_NAME = 'ditok7ztl';
 const CLOUDINARY_UPLOAD_PRESET = 'Swami-Viveka';
 
 const TestimonialsPage = () => {

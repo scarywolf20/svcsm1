@@ -11,7 +11,7 @@ import {
 import { db } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
 
-const CLOUDINARY_CLOUD_NAME = 'dh4xushgf';
+const CLOUDINARY_CLOUD_NAME = 'ditok7ztl';
 const CLOUDINARY_UPLOAD_PRESET = 'Swami-Viveka';
 
 const normalizeGallery = (thumbnail, gallery) => {

@@ -16,7 +16,7 @@ const AboutSVCMS = () => {
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://res.cloudinary.com/dh4xushgf/image/upload/v1770227408/20250807_112400_u6e7xn.jpg" 
+            src="https://res.cloudinary.com/ditok7ztl/image/upload/v1775375424/20250807_112400_z9jz8q.jpg" 
             alt="SVICSM College Building" 
             className="w-full h-full object-cover"
           />
@@ -82,7 +82,7 @@ const AboutSVCMS = () => {
           >
             <div className="absolute inset-0 bg-sv-gold/10 transform translate-x-4 translate-y-4 rounded-2xl -z-10"></div>
             <img 
-              src="https://res.cloudinary.com/dh4xushgf/image/upload/v1770227592/18_t5bmcm.jpg" 
+              src="https://res.cloudinary.com/ditok7ztl/image/upload/v1775375524/4_pg1dok.jpg" 
               alt="Campus Life" 
               className="rounded-2xl shadow-xl w-full"
             />

@@ -12,7 +12,7 @@ import { db } from '../../firebase';
 import { Trash2, Edit2, CheckCircle, XCircle, Home, EyeOff, Eye } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
-const CLOUDINARY_CLOUD_NAME = 'dh4xushgf';
+const CLOUDINARY_CLOUD_NAME = 'ditok7ztl';
 const CLOUDINARY_UPLOAD_PRESET = 'Swami-Viveka';
 
 const AdminTestimonials = () => {

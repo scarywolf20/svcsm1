@@ -25,7 +25,7 @@ const About = () => {
 
             {/* The Image */}
             <img 
-              src="https://res.cloudinary.com/dh4xushgf/image/upload/v1770226723/img_unj9wg.png" 
+              src="https://res.cloudinary.com/ditok7ztl/image/upload/v1775374889/img_x68kxj.png" 
               alt="Mr. Kiran R. Arote" 
               className="relative z-10 h-full w-full object-contain object-bottom drop-shadow-2xl"
             />

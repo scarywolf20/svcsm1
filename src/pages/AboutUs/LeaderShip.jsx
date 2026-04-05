@@ -7,8 +7,8 @@ const leaders = [
   {
     name: "Mr. Kiran R. Arote",
     role: "Founder & Director",
-    // Placeholder image used. Replace with: https://res.cloudinary.com/dh4xushgf/image/upload/v1770228406/20260126_084922_yi9vxl.jpg if that is his photo.
-    image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770228406/20260126_084922_yi9vxl.jpg", 
+    // Placeholder image used. Replace with: https://res.cloudinary.com/ditok7ztl/image/upload/v1770228406/20260126_084922_yi9vxl.jpg if that is his photo.
+    image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775375285/20260126_084922_gy9wab.jpg", 
     qualifications: "Founder & CEO, Eduparivartan Intellectual Services LLP",
     experience: "Edupreneur since 2009 (17 Years)",
     bio: [
@@ -21,7 +21,7 @@ const leaders = [
   {
     name: "Mr. Chetan N. Bargal",
     role: "Principal",
-    image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770297321/20260205_160340_edmxrh.jpg",
+    image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775375107/chetan_jjagd3.png",
     qualifications: "B.E. (Mechanical), MBA",
     experience: "10 Years of Experience",
     bio: [

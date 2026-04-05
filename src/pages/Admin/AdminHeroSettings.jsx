@@ -65,7 +65,7 @@ const AdminHeroSettings = () => {
       formData.append('file', file);
       formData.append('upload_preset', 'Swami-Viveka');
 
-      const res = await fetch('https://api.cloudinary.com/v1_1/dh4xushgf/image/upload', {
+      const res = await fetch('https://api.cloudinary.com/v1_1/ditok7ztl/image/upload', {
         method: 'POST',
         body: formData,
       });
@@ -194,7 +194,7 @@ const AdminHeroSettings = () => {
                 onChange={(e) => handleUploadToCloudinary(e.target.files?.[0])}
                 className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-sv-blue file:text-white hover:file:bg-sv-blue/90"
               />
-              <p className="text-xs text-gray-500 mt-2">Upload preset: Swami-Viveka, Cloud name: dh4xushgf</p>
+              <p className="text-xs text-gray-500 mt-2">Upload preset: Swami-Viveka, Cloud name: ditok7ztl</p>
             </div>
           </div>
 

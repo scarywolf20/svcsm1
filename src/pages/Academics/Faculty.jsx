@@ -134,7 +134,7 @@ const ProfileCard = ({ person, index }) => {
           
           {/* Person Image */}
           <img 
-            src={person.image} 
+            src={person.image || 'https://via.placeholder.com/800x600?text=Faculty+Image'} 
             alt={person.name} 
             className="relative z-10 h-full w-auto object-contain drop-shadow-md transform group-hover:scale-105 transition-transform duration-500 origin-bottom"
           />
@@ -234,8 +234,15 @@ const Faculty = () => {
         const leadership = sortedActive.filter((r) => r.category === 'leadership');
         const hod = sortedActive.filter((r) => r.category === 'hod');
 
-        if (leadership.length > 0) setLeadershipRows(leadership);
-        if (hod.length > 0) setHodRows(hod);
+        if (leadership.length > 0) {
+          // Merge Firebase leadership with static leadership, putting Firebase ones first.
+          // Alternatively, just replace if they intend to manage fully via Firebase. 
+          // Assuming replacement to allow admin to delete static items.
+          setLeadershipRows(leadership);
+        }
+        if (hod.length > 0) {
+          setHodRows(hod);
+        }
       } catch {
         if (ignore) return;
       }

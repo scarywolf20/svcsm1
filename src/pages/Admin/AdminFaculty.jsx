@@ -11,7 +11,7 @@ import {
 import { db } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
 
-const CLOUDINARY_CLOUD_NAME = 'dh4xushgf';
+const CLOUDINARY_CLOUD_NAME = 'ditok7ztl';
 const CLOUDINARY_UPLOAD_PRESET = 'Swami-Viveka';
 
 const AdminFaculty = () => {
@@ -20,6 +20,7 @@ const AdminFaculty = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
 
   const [items, setItems] = useState([]);
@@ -101,6 +102,7 @@ const AdminFaculty = () => {
     if (!file) return;
 
     setError('');
+    setIsUploading(true);
 
     try {
       const formData = new FormData();
@@ -126,6 +128,8 @@ const AdminFaculty = () => {
     } catch (e) {
       setError(e?.message || 'Failed to upload image');
       toastError('Upload Failed', e?.message || 'Failed to upload image');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -311,6 +315,7 @@ const AdminFaculty = () => {
                   className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-sv-blue file:text-white hover:file:bg-sv-blue/90"
                 />
                 <p className="text-xs text-gray-500 mt-2">Upload preset: {CLOUDINARY_UPLOAD_PRESET}, Cloud name: {CLOUDINARY_CLOUD_NAME}</p>
+                {isUploading && <p className="text-xs text-sv-blue mt-1 font-bold">Uploading image, please wait...</p>}
               </div>
             </div>
           </div>
@@ -333,7 +338,7 @@ const AdminFaculty = () => {
             <div className="flex gap-3">
               <button
                 type="submit"
-                disabled={isSaving}
+                disabled={isSaving || isUploading}
                 className="px-5 py-3 rounded-lg font-bold text-white bg-sv-maroon hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {editingId ? (isSaving ? 'Updating...' : 'Update') : isSaving ? 'Saving...' : 'Add'}

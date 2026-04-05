@@ -9,30 +9,30 @@ const resultsData = {
     type: "current",
     description: "Setting new benchmarks in academic excellence.",
     scienceToppers: [
-      { name: "Gayatri Sarode", percent: "81.50%", rank: "1st", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267975/Gayatri_Sarode_iwf598.png" },
-      { name: "Varsha Purkar", percent: "80.83%", rank: "2nd", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267973/Varsha_Purkar_tymymo.png" },
-      { name: "Krushna More", percent: "78.17%", rank: "3rd", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770268444/Krushna_More_rxyev0.png" },
+      { name: "Gayatri Sarode", percent: "81.50%", rank: "1st", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376270/Gayatri_Sarode_xnvjlo.png" },
+      { name: "Varsha Purkar", percent: "80.83%", rank: "2nd", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376297/Varsha_Purkar_e244ba.png" },
+      { name: "Krushna More", percent: "78.17%", rank: "3rd", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376286/Krushna_More_lrtait.png" },
     ],
     commerceToppers: [
-      { name: "Prachi Jagoo", percent: "84.17%", rank: "1st", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267971/Prachi_Jajoo_l1w7xi.png" },
-      { name: "Sarthak Pawar", percent: "83.17%", rank: "2nd", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267972/Sarthak_Pawar_jr4htv.png" },
-      { name: "Prince Himthani", percent: "82.67%", rank: "3rd", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267976/Prince_Himthani_a6wv77.png" },
+      { name: "Prachi Jagoo", percent: "84.17%", rank: "1st", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376378/Prachi_Jajoo_nhxcso.png" },
+      { name: "Sarthak Pawar", percent: "83.17%", rank: "2nd", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376378/Sarthak_Pawar_smjoyu.png" },
+      { name: "Prince Himthani", percent: "82.67%", rank: "3rd", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376399/Prince_Himthani_jpgjg6.png" },
     ]
   },
   "2023-24": {
     type: "banner-only",
     description: "A historic year with 100% pass results across all streams.",
-    bannerImage: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267975/Screenshot_2026-02-02_at_11.27.28_AM_1_gbezcw.png" 
+    bannerImage: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376517/Screenshot_2026-02-02_at_11.27.28_AM_iytchr.png" 
   },
   "2022-23": {
     type: "mixed",
     description: "The 'Ek Number' Batch that started the legacy.",
     toppers: [
-      { name: "Adesh Athawale", percent: "88.50%", badge: "Acc: 96", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267969/IMG-20240111-WA0001_r24nfu.jpg" },
-      { name: "Parul Soni", percent: "87.67%", badge: "Acc: 96", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267969/IMG-20240111-WA0002_zy4nx1.jpg" },
-      { name: "Sarthak Jivrak", percent: "80.67%", badge: "Acc: 96", image: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267969/IMG-20240111-WA0004_kk2hzz.jpg" },
+      { name: "Adesh Athawale", percent: "88.50%", badge: "Acc: 96", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376603/IMG-20240111-WA0001_yfvvzq.jpg" },
+      { name: "Parul Soni", percent: "87.67%", badge: "Acc: 96", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376603/IMG-20240111-WA0002_s61xl8.jpg" },
+      { name: "Sarthak Jivrak", percent: "80.67%", badge: "Acc: 96", image: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376606/IMG-20240111-WA0004_easx2t.jpg" },
     ],
-    bannerImage: "https://res.cloudinary.com/dh4xushgf/image/upload/v1770267975/IMG-20240111-WA0008_frzxw2.jpg" 
+    bannerImage: "https://res.cloudinary.com/ditok7ztl/image/upload/v1775376605/IMG-20240111-WA0008_ijyfld.jpg" 
   }
 };
 

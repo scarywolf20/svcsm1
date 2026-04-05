@@ -48,7 +48,7 @@ const CampusLife = () => {
           {/* Main Large Image */}
           <motion.div variants={itemVariants} className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-2xl">
             <img 
-              src="https://res.cloudinary.com/dh4xushgf/image/upload/v1770277650/IMG_20220708_113408_e2pdai.jpg" 
+              src="https://res.cloudinary.com/ditok7ztl/image/upload/v1775375880/IMG_20220708_113408_xpnr1u.jpg" 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               alt="Library" 
             />
@@ -60,7 +60,7 @@ const CampusLife = () => {
           {/* Top Right */}
           <motion.div variants={itemVariants} className="md:col-span-2 relative group overflow-hidden rounded-2xl">
             <img 
-              src="https://res.cloudinary.com/dh4xushgf/image/upload/v1770227408/20250807_112400_u6e7xn.jpg" 
+              src="https://res.cloudinary.com/ditok7ztl/image/upload/v1775375424/20250807_112400_z9jz8q.jpg" 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               alt="Lab" 
             />
@@ -70,7 +70,7 @@ const CampusLife = () => {
           {/* Bottom Right 1 */}
           <motion.div variants={itemVariants} className="relative group overflow-hidden rounded-2xl">
             <img 
-              src="https://res.cloudinary.com/dh4xushgf/image/upload/v1770277649/IMG-20250112-WA0101_p8obwu.jpg" 
+              src="https://res.cloudinary.com/ditok7ztl/image/upload/v1775376042/IMG-20250112-WA0059_s0z1y3.jpg" 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               alt="Sports" 
             />

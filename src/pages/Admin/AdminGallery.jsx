@@ -11,7 +11,7 @@ import { db } from '../../firebase';
 import { Trash2, Image as ImageIcon, Upload, Filter, Plus } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
-const CLOUDINARY_CLOUD_NAME = 'dh4xushgf';
+const CLOUDINARY_CLOUD_NAME = 'ditok7ztl';
 const CLOUDINARY_UPLOAD_PRESET = 'Swami-Viveka';
 
 const CATEGORIES = ["Campus", "Sports", "Cultural", "Students"];
