@@ -41,9 +41,22 @@ const downloadCsvWithColumns = (filename, columns, rows) => {
   URL.revokeObjectURL(url);
 };
 
+const resolveStreamLabel = (admission) => {
+  const stream = admission.streamScience
+    ? 'Science'
+    : admission.streamCommerce
+      ? 'Commerce'
+      : admission.streamArts
+        ? 'Arts'
+        : admission.streamCET
+          ? 'CET'
+          : admission.stream || '-';
+  return `${stream}${admission.isHybrid ? ' (Hybrid)' : ''}`;
+};
+
 const JuniorAdmissionRow = ({ row }) => {
   const standard = row.standard || '-';
-  const stream = (row.streamScience ? 'Science' : row.streamCommerce ? 'Commerce' : row.stream || '-') + (row.isHybrid ? ' (Hybrid)' : '');
+  const stream = resolveStreamLabel(row);
   const student = `${row.surname || ''} ${row.fathersName || ''}`.trim() || '-';
   const createdAt = row.createdAt?.toDate ? row.createdAt.toDate() : null;
   const date = createdAt ? createdAt.toLocaleDateString() : '-';
@@ -88,36 +101,34 @@ const AdminJuniorAdmissions = () => {
     const cats = {
       '11th Science': 0,
       '11th Commerce': 0,
+      '11th CET': 0,
       '12th Science': 0,
       '12th Commerce': 0,
-      // 'Other': 0
+      '12th CET': 0,
     };
 
     juniorAdmissions.forEach(admission => {
       const std = admission.standard;
-      const stream = admission.streamScience ? 'Science' : admission.streamCommerce ? 'Commerce' : admission.stream;
-      
+      const stream = resolveStreamLabel(admission).replace(' (Hybrid)', '');
       let key = `${std} ${stream}`;
       if (admission.isHybrid) {
         key += ' (Hybrid)';
       }
-
       cats[key] = (cats[key] || 0) + 1;
     });
 
-    return Object.entries(cats).filter(([_, count]) => count > 0 || true).sort((a, b) => {
-        // specific sort to keep 11th/12th together, maybe just alpha sort
-        if (a[0] < b[0]) return -1;
-        if (a[0] > b[0]) return 1;
-        return 0;
-    }); 
+    return Object.entries(cats).filter(([, count]) => count > 0).sort((a, b) => {
+      if (a[0] < b[0]) return -1;
+      if (a[0] > b[0]) return 1;
+      return 0;
+    });
   }, [juniorAdmissions]);
 
   const filteredAdmissions = useMemo(() => {
     if (!selectedCategory) return [];
     return juniorAdmissions.filter(admission => {
       const std = admission.standard;
-      const stream = admission.streamScience ? 'Science' : admission.streamCommerce ? 'Commerce' : admission.stream;
+      const stream = resolveStreamLabel(admission).replace(' (Hybrid)', '');
       let key = `${std} ${stream}`;
       if (admission.isHybrid) {
         key += ' (Hybrid)';
@@ -136,7 +147,15 @@ const AdminJuniorAdmissions = () => {
       {
         header: 'Stream',
         getValue: (r) => {
-          let s = r?.streamScience ? 'Science' : r?.streamCommerce ? 'Commerce' : r?.stream || '';
+          let s = r?.streamScience
+            ? 'Science'
+            : r?.streamCommerce
+              ? 'Commerce'
+              : r?.streamArts
+                ? 'Arts'
+                : r?.streamCET
+                  ? 'CET'
+                  : r?.stream || '';
           if (r?.isHybrid) s += ' (Hybrid)';
           return s;
         },

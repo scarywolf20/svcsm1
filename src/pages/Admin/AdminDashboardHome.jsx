@@ -7,6 +7,14 @@ import { formatCourseName } from '../../utils';
 
 const MotionDiv = motion.div;
 
+const getJuniorStreamLabel = (data) => {
+  if (data.streamScience) return 'Science';
+  if (data.streamCommerce) return 'Commerce';
+  if (data.streamArts) return 'Arts';
+  if (data.streamCET) return 'CET';
+  return data.stream || 'Unknown';
+};
+
 const AdminDashboardHome = () => {
   const [stats, setStats] = useState({
     juniorCount: 0,
@@ -28,7 +36,7 @@ const AdminDashboardHome = () => {
         ...doc.data(),
         type: 'Junior',
         studentName: `${doc.data().firstName || ''} ${doc.data().surname || ''}`.trim() || 'Unknown',
-        courseName: `${doc.data().standard} ${doc.data().stream}`,
+        courseName: `${doc.data().standard} ${getJuniorStreamLabel(doc.data())}`,
         date: doc.data().createdAt?.toDate() || new Date()
       }));
 
