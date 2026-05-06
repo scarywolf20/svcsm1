@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .carousel { max-width: 500px; position: relative; margin: auto; }
+        .slides { display: none; width: 100%; }
+        .slides.active { display: block; }
+        .slides img { width: 100%; }
+        button { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 10px 15px; cursor: pointer; }
+        .prev { left: 10px; }
+        .next { right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="carousel">
+        <div class="slides active"><img src="image1.jpg" alt="1"></div>
+        <div class="slides"><img src="image2.jpg" alt="2"></div>
+        <div class="slides"><img src="image3.jpg" alt="3"></div>
+        <button class="prev" onclick="changeSlide(-1)">❮</button>
+        <button class="next" onclick="changeSlide(1)">❯</button>
+    </div>
+    <script>
+        let current = 0;
+        function changeSlide(n) {
+            let slides = document.querySelectorAll('.slides');
+            current = (current + n + slides.length) % slides.length;
+            slides.forEach(s => s.classList.remove('active'));
+            slides[current].classList.add('active');
+        }
+    </script>
+</body>
+</html>

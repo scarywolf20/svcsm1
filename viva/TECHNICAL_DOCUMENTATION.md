@@ -281,15 +281,7 @@ Redirect to login if unauthorized
      - `news`
      - `hero_settings`
 
-### Firebase Configuration
-```javascript
-apiKey: AIzaSyCfrUIGJTOst4nFxMBw6HQelyfo0Px1UjI
-authDomain: svcsm-c2af4.firebaseapp.com
-projectId: svcsm-c2af4
-storageBucket: svcsm-c2af4.firebasestorage.app
-messagingSenderId: 403701537460
-appId: 1:403701537460:web:e14ee68b30725f2d6315e1
-```
+
 
 ---
 
