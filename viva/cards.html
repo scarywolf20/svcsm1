@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cards</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #f5f5f5; font-family: Arial; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .card h3 { margin: 0 0 10px 0; }
+        .card p { color: #666; margin: 0 0 15px 0; }
+        .card button { background: #333; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="cards">
+        <div class="card"><h3>Card 1</h3><p>Description here</p><button>Click Me</button></div>
+        <div class="card"><h3>Card 2</h3><p>Description here</p><button>Click Me</button></div>
+        <div class="card"><h3>Card 3</h3><p>Description here</p><button>Click Me</button></div>
+    </div>
+</body>
+</html>

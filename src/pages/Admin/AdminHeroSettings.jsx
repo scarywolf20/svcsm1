@@ -7,6 +7,7 @@ const AdminHeroSettings = () => {
   const { success, error: toastError } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
 
   const [badgeText, setBadgeText] = useState('Admissions Open for 2026-27');
@@ -59,16 +60,32 @@ const AdminHeroSettings = () => {
     if (!file) return;
 
     setError('');
+    setIsUploading(true);
 
     try {
+      // Validate file
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new Error('File too large. Maximum size: 10MB');
+      }
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', 'Swami-Viveka');
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const res = await fetch('https://api.cloudinary.com/v1_1/ditok7ztl/image/upload', {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const json = await res.json();
 
@@ -82,8 +99,15 @@ const AdminHeroSettings = () => {
       setImageUrl(url);
       success('Image Uploaded', 'Hero background image updated successfully');
     } catch (e) {
-      setError(e?.message || 'Failed to upload image');
-      toastError('Upload Failed', e?.message || 'Failed to upload image');
+      if (e.name === 'AbortError') {
+        setError('Upload timeout. Please try again.');
+        toastError('Upload Timeout', 'Upload took too long');
+      } else {
+        setError(e?.message || 'Failed to upload image');
+        toastError('Upload Failed', e?.message || 'Failed to upload image');
+      }
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -192,9 +216,10 @@ const AdminHeroSettings = () => {
                 type="file"
                 accept="image/*"
                 onChange={(e) => handleUploadToCloudinary(e.target.files?.[0])}
-                className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-sv-blue file:text-white hover:file:bg-sv-blue/90"
+                className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-sv-blue file:text-white hover:file:bg-sv-blue/90 disabled:opacity-50"
+                disabled={isUploading}
               />
-              <p className="text-xs text-gray-500 mt-2">Upload preset: Swami-Viveka, Cloud name: ditok7ztl</p>
+              <p className="text-xs text-gray-500 mt-2">Max 10MB. {isUploading && <span className="text-sv-blue font-bold">Uploading...</span>}</p>
             </div>
           </div>
 

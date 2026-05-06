@@ -105,14 +105,29 @@ const AdminFaculty = () => {
     setIsUploading(true);
 
     try {
+      // Validate file
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new Error('File too large. Maximum size: 10MB');
+      }
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const json = await res.json();
 
@@ -126,8 +141,13 @@ const AdminFaculty = () => {
       setImageUrl(url);
       success('Image Uploaded', 'Image uploaded to Cloudinary');
     } catch (e) {
-      setError(e?.message || 'Failed to upload image');
-      toastError('Upload Failed', e?.message || 'Failed to upload image');
+      if (e.name === 'AbortError') {
+        setError('Upload timeout. Please try again.');
+        toastError('Upload Timeout', 'Upload took too long');
+      } else {
+        setError(e?.message || 'Failed to upload image');
+        toastError('Upload Failed', e?.message || 'Failed to upload image');
+      }
     } finally {
       setIsUploading(false);
     }
@@ -314,7 +334,7 @@ const AdminFaculty = () => {
                   onChange={(e) => handleUploadToCloudinary(e.target.files?.[0])}
                   className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-sv-blue file:text-white hover:file:bg-sv-blue/90"
                 />
-                <p className="text-xs text-gray-500 mt-2">Upload preset: {CLOUDINARY_UPLOAD_PRESET}, Cloud name: {CLOUDINARY_CLOUD_NAME}</p>
+                <p className="text-xs text-gray-500 mt-2">Max 10MB. Upload preset: {CLOUDINARY_UPLOAD_PRESET}</p>
                 {isUploading && <p className="text-xs text-sv-blue mt-1 font-bold">Uploading image, please wait...</p>}
               </div>
             </div>

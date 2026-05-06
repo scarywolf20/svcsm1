@@ -65,22 +65,46 @@ const AdminGallery = () => {
     setIsSaving(true);
 
     try {
+      // Validate file
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new Error('File too large. Maximum size: 10MB');
+      }
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error?.message || 'Upload failed');
-      setImageUrl(json.secure_url || json.url);
+      
+      const url = json.secure_url || json.url;
+      if (!url) throw new Error('Upload succeeded but no URL returned');
+      
+      setImageUrl(url);
       success('Image Uploaded', 'Image uploaded to Cloudinary successfully');
     } catch (e) {
-      setError(e.message);
-      toastError('Upload Failed', e.message);
+      if (e.name === 'AbortError') {
+        setError('Upload timeout. Please try again.');
+        toastError('Upload Timeout', 'Upload took too long');
+      } else {
+        setError(e.message);
+        toastError('Upload Failed', e.message);
+      }
     } finally {
       setIsSaving(false);
     }

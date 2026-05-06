@@ -21,6 +21,7 @@ const AdminTestimonials = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
 
   const [items, setItems] = useState([]);
@@ -92,24 +93,51 @@ const AdminTestimonials = () => {
   const handleUpload = async (file) => {
     if (!file) return;
     setError('');
+    setIsUploading(true);
 
     try {
+      // Validate file
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new Error('File too large. Maximum size: 10MB');
+      }
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error?.message || 'Upload failed');
-      setImageUrl(json.secure_url || json.url);
+      
+      const url = json.secure_url || json.url;
+      if (!url) throw new Error('Upload succeeded but no URL returned');
+      
+      setImageUrl(url);
       success('Image Uploaded', 'Image uploaded to Cloudinary');
     } catch (e) {
-      setError(e.message);
-      toastError('Upload Failed', e.message);
+      if (e.name === 'AbortError') {
+        setError('Upload timeout. Please try again.');
+        toastError('Upload Timeout', 'Upload took too long');
+      } else {
+        setError(e.message);
+        toastError('Upload Failed', e.message);
+      }
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -221,7 +249,8 @@ const AdminTestimonials = () => {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1">Photo</label>
-                        <input type="file" accept="image/*" onChange={e => handleUpload(e.target.files[0])} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-sv-blue file:text-white" />
+                        <input type="file" accept="image/*" onChange={e => handleUpload(e.target.files?.[0])} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-sv-blue file:text-white disabled:opacity-50" disabled={isUploading} />
+                        <p className="text-xs text-gray-500 mt-1">Max 10MB. {isUploading && <span className="text-sv-blue font-bold">Uploading...</span>}</p>
                         {imageUrl && <img src={imageUrl} alt="Preview" className="w-16 h-16 rounded-full object-cover mt-2 border border-gray-200" />}
                     </div>
                     <div>
@@ -241,7 +270,7 @@ const AdminTestimonials = () => {
                 </div>
 
                 <div className="md:col-span-2 pt-4 border-t flex gap-3">
-                    <button type="submit" disabled={isSaving} className="bg-sv-blue text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-900 disabled:opacity-50">
+                    <button type="submit" disabled={isSaving || isUploading} className="bg-sv-blue text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-900 disabled:opacity-50">
                         {editingId ? 'Update Testimonial' : 'Add Testimonial'}
                     </button>
                     {editingId && (

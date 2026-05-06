@@ -21,6 +21,7 @@ const TestimonialsPage = () => {
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [uploadError, setUploadError] = useState('');
 
@@ -69,27 +70,49 @@ const TestimonialsPage = () => {
   const handleImageUpload = async (file) => {
     if (!file) return;
     setUploadError('');
-    setIsSubmitting(true); // temporary block
+    setIsUploadingImage(true);
 
     try {
+      // Validate file
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new Error('File too large. Maximum size: 10MB');
+      }
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error?.message || 'Upload failed');
       
-      setImageUrl(json.secure_url || json.url);
+      const url = json.secure_url || json.url;
+      if (!url) throw new Error('Upload succeeded but no URL returned');
+      
+      setImageUrl(url);
       setImage(null); // Clear file input
     } catch (e) {
-      setUploadError('Image upload failed. Please try again.');
+      if (e.name === 'AbortError') {
+        setUploadError('Upload timeout. Please try again.');
+      } else {
+        setUploadError(e.message || 'Image upload failed. Please try again.');
+      }
     } finally {
-      setIsSubmitting(false);
+      setIsUploadingImage(false);
     }
   };
 
@@ -270,15 +293,15 @@ const TestimonialsPage = () => {
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1">Profile Photo (Optional)</label>
                                 <div className="flex items-center gap-3">
-                                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors">
+                                    <label className={`cursor-pointer ${isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''} bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors`}>
                                         <Upload size={16} />
-                                        {imageUrl ? 'Change Photo' : 'Upload Photo'}
+                                        {isUploadingImage ? 'Uploading...' : imageUrl ? 'Change Photo' : 'Upload Photo'}
                                         <input 
                                             type="file" 
                                             accept="image/*" 
                                             className="hidden" 
-                                            onChange={e => handleImageUpload(e.target.files[0])}
-                                            disabled={isSubmitting}
+                                            onChange={e => handleImageUpload(e.target.files?.[0])}
+                                            disabled={isUploadingImage}
                                         />
                                     </label>
                                     {imageUrl && (

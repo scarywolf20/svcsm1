@@ -28,6 +28,7 @@ const AdminActivitiesEvents = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [error, setError] = useState('');
 
   const [items, setItems] = useState([]);
@@ -107,8 +108,21 @@ const AdminActivitiesEvents = () => {
       .filter(Boolean);
   };
 
+  const validateFile = (file) => {
+    if (!file) return 'No file selected';
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) return `File too large. Max size: 10MB`;
+    if (!file.type.startsWith('image/')) return 'Only image files are allowed';
+    return null;
+  };
+
   const handleUploadToCloudinary = async (file) => {
     if (!file) return;
+
+    const validationError = validateFile(file);
+    if (validationError) {
+      throw new Error(validationError);
+    }
 
     setError('');
 
@@ -117,10 +131,16 @@ const AdminActivitiesEvents = () => {
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const json = await res.json();
 
@@ -133,69 +153,86 @@ const AdminActivitiesEvents = () => {
 
       return url;
     } catch (e) {
+      if (e.name === 'AbortError') {
+        throw new Error('Upload timeout. Please try again.');
+      }
       throw new Error(e?.message || 'Failed to upload image');
     }
   };
 
   const handleThumbnailUpload = async (file) => {
+    if (!file) return;
+    setIsUploadingThumbnail(true);
+    setError('');
     try {
       const url = await handleUploadToCloudinary(file);
       if (url) {
         setThumbnailUrl(url);
         const existing = parseGalleryUrls(galleryText);
         if (!existing.includes(url)) setGalleryText([url, ...existing].join('\n'));
+        success('Upload Successful', 'Thumbnail uploaded');
       }
     } catch (e) {
       setError(e.message);
-      toastError('Error', e.message);
+      toastError('Upload Failed', e.message);
+    } finally {
+      setIsUploadingThumbnail(false);
     }
   };
 
-  const handleGalleryUpload = async (files) => {
-    if (!files || files.length === 0) return;
+  const handleGalleryUpload = async (fileList) => {
+    if (!fileList || fileList.length === 0) return;
 
     setIsUploadingGallery(true);
     setError('');
 
     try {
-      const newUrls = [];
-      // Upload sequentially to avoid overwhelming browser/network or simple Promise.all
-      // Using Promise.all for better performance if Cloudinary allows concurrency
-      const uploadPromises = Array.from(files).map((file) => handleUploadToCloudinary(file));
+      // Convert FileList to Array immediately to avoid staleness issues
+      const filesArray = Array.from(fileList);
       
+      // Validate all files first
+      for (const file of filesArray) {
+        const validationError = validateFile(file);
+        if (validationError) {
+          throw new Error(`${file.name}: ${validationError}`);
+        }
+      }
+
+      // Upload with Promise.allSettled for resilience
+      const uploadPromises = filesArray.map((file) => handleUploadToCloudinary(file));
       const results = await Promise.allSettled(uploadPromises);
       
       const successUrls = [];
       const errors = [];
       
-      results.forEach((res) => {
+      results.forEach((res, idx) => {
         if (res.status === 'fulfilled') {
           successUrls.push(res.value);
         } else {
-          errors.push(res.reason?.message);
+          errors.push(`${filesArray[idx].name}: ${res.reason?.message}`);
         }
       });
 
       if (successUrls.length > 0) {
         setGalleryText((prev) => {
            const existing = parseGalleryUrls(prev);
-           // Add new URLs to the top or bottom? Let's add to bottom.
-           // Filter dupes just in case
-           const combined = [...existing, ...successUrls]; 
+           const combined = [...existing, ...successUrls];
            return combined.join('\n');
         });
       }
 
-      if (errors.length > 0) {
-        setError(`Some images failed to upload: ${errors[0]} (and ${errors.length - 1} others)`);
-        toastError('Upload Warning', 'Some images failed to upload');
+      if (errors.length > 0 && successUrls.length === 0) {
+        throw new Error(errors[0]);
+      } else if (errors.length > 0) {
+        setError(`${successUrls.length}/${filesArray.length} images uploaded. Failed: ${errors[0]}`);
+        toastError('Partial Upload', `${successUrls.length}/${filesArray.length} images uploaded`);
       } else {
-        success('Gallery Uploaded', 'All images uploaded successfully');
+        success('Gallery Uploaded', `${successUrls.length} image(s) uploaded successfully`);
       }
 
     } catch (e) {
       setError(e?.message || 'Failed to upload gallery images');
-      toastError('Error', e?.message || 'Failed to upload gallery');
+      toastError('Upload Error', e?.message || 'Failed to upload gallery');
     } finally {
       setIsUploadingGallery(false);
     }
@@ -350,14 +387,15 @@ const AdminActivitiesEvents = () => {
               />
 
               <div className="mt-3">
-                <label className="block text-sm font-bold mb-2 text-gray-700">Or Upload Thumbnail (Cloudinary)</label>
+                <label className="block text-sm font-bold mb-2 text-gray-700">Or Upload Thumbnail (Cloudinary) {isUploadingThumbnail && <span className="text-sv-blue">(Uploading...)</span>}</label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleThumbnailUpload(e.target.files?.[0])}
                   className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-sv-blue file:text-white hover:file:bg-sv-blue/90"
+                  disabled={isUploadingThumbnail}
                 />
-                <p className="text-xs text-gray-500 mt-2">Upload preset: {CLOUDINARY_UPLOAD_PRESET}, Cloud name: {CLOUDINARY_CLOUD_NAME}</p>
+                <p className="text-xs text-gray-500 mt-2">Max 10MB. Upload preset: {CLOUDINARY_UPLOAD_PRESET}</p>
               </div>
             </div>
 
