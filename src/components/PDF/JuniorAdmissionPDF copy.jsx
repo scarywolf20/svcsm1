@@ -1,8 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
-
-// Disable hyphenation so words like "Pimpalgaon" never break mid-word
-Font.registerHyphenationCallback(word => [word]);
+import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 
 // Import your logo if available
 import logo from '../../assets/logo-name.png'; 
@@ -58,8 +55,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Times-Bold',
     textAlign: 'center',
-    marginBottom: 5,
-    breakWord: false
+    marginBottom: 5
   },
   instituteSubtitle: {
     fontSize: 11,
@@ -820,46 +816,46 @@ const JuniorAdmissionPDF = ({ data }) => {
             </View>
           )}
         </View>
+        </Page>
 
-        {/* DOCUMENTS REQUIRED — wrap={false} keeps this entire block on one page, never splits */}
-        <View wrap={false}>
-          <View style={styles.docsBox}>
-            <Text style={styles.docsTitle}>• DOCUMENTS REQUIRED AT THE TIME OF ADMISSION (Original + 2 Xerox Copies)</Text>
-            <View style={{ marginTop: 6 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <View style={data.docLeavingCert ? styles.checkedBox : styles.checkbox} />
-                <Text style={styles.docItem}>1. School/College Leaving Certificate (Duly counter signed by Principal/College Authorities)</Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <View style={data.docMigration ? styles.checkedBox : styles.checkbox} />
-                <Text style={styles.docItem}>2. Migration Certificate (If necessary)</Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <View style={data.docMarksheet ? styles.checkedBox : styles.checkbox} />
-                <Text style={styles.docItem}>3. Previous Year Marksheet (SSC/11th)</Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={data.docAadhar ? styles.checkedBox : styles.checkbox} />
-                <Text style={styles.docItem}>4. Aadhar Card</Text>
-              </View>
+          <Page size="A4" style={styles.page}>
+        {/* DOCUMENTS REQUIRED */}
+        <View style={styles.docsBox}>
+          <Text style={styles.docsTitle}>• DOCUMENTS REQUIRED AT THE TIME OF ADMISSION (Original + 2 Xerox Copies)</Text>
+          <View style={{ marginTop: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <View style={data.docLeavingCert ? styles.checkedBox : styles.checkbox} />
+              <Text style={styles.docItem}>1. School/College Leaving Certificate (Duly counter signed by Principal/College Authorities)</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <View style={data.docMigration ? styles.checkedBox : styles.checkbox} />
+              <Text style={styles.docItem}>2. Migration Certificate (If necessary)</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <View style={data.docMarksheet ? styles.checkedBox : styles.checkbox} />
+              <Text style={styles.docItem}>3. Previous Year Marksheet (SSC/11th)</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={data.docAadhar ? styles.checkedBox : styles.checkbox} />
+              <Text style={styles.docItem}>4. Aadhar Card</Text>
             </View>
           </View>
+        </View>
 
-          <View style={{ marginTop: 10, marginBottom: 8 }}>
-            <Text style={{ fontSize: 10, textAlign: 'justify', lineHeight: 1.5 }}>
-              I hereby agree that, I have attached copies of only mentioned documents to my application and understand that my application will be approved on the basis of above documents supplied by me[...]
-            </Text>
+        <View style={{ marginTop: 10, marginBottom: 8 }}>
+          <Text style={{ fontSize: 10, textAlign: 'justify', lineHeight: 1.5 }}>
+            I hereby agree that, I have attached copies of only mentioned documents to my application and understand that my application will be approved on the basis of above documents supplied by me[...]
+          </Text>
+        </View>
+
+        {/* Signature Section */}
+        <View style={styles.signatureRow}>
+          <View style={styles.signBox}>
+            <Text style={{ fontSize: 10, marginBottom: 3 }}>Date: ____ / ____ / ____</Text>
+            <Text style={{ fontSize: 10, marginBottom: 3 }}>Place: _______________</Text>
           </View>
-
-          {/* Signature Section */}
-          <View style={styles.signatureRow}>
-            <View style={styles.signBox}>
-              <Text style={{ fontSize: 10, marginBottom: 3 }}>Date: ____ / ____ / ____</Text>
-              <Text style={{ fontSize: 10, marginBottom: 3 }}>Place: _______________</Text>
-            </View>
-            <View style={styles.signBox}>
-              <Text style={styles.signLine}>Signature of Applicant</Text>
-            </View>
+          <View style={styles.signBox}>
+            <Text style={styles.signLine}>Signature of Applicant</Text>
           </View>
         </View>
       </Page>
