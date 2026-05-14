@@ -280,43 +280,43 @@ const JuniorAdmissionForm = () => {
     setValue("email", "student@example.com");
   };
 
-  // Enhanced DigitBoxes with backspace navigation
-  const DigitBoxes = ({ name, count, label }) => {
-    return (
-      <div>
-        <label className="block text-sm font-bold mb-2 text-gray-700">{label} *</label>
-        <div className="flex flex-wrap gap-2">
-          {[...Array(count)].map((_, i) => (
-            <input
-              key={i}
-              type="text"
-              maxLength="1"
-              {...register(`${name}${i}`, {
-                required: `${label} digit ${i+1} required`,
-                pattern: { value: /^[0-9]$/, message: "Only digits" }
-              })}
-              className="w-8 h-10 sm:w-10 sm:h-12 text-center border-2 rounded-lg text-base sm:text-lg font-bold focus:ring-2"
-              style={{ borderColor: '#B8860B', outlineColor: '#800020' }}
-              onKeyDown={(e) => {
-                const target = e.target;
-                if (e.key === 'Backspace' && target.value === '' && i > 0) {
-                  const prevInput = target.parentElement.children[i - 1];
-                  if (prevInput) prevInput.focus();
-                }
-              }}
-              onInput={(e) => {
-                if (e.target.value && i < count - 1) {
-                  const nextInput = e.target.parentElement.children[i + 1];
-                  if (nextInput) nextInput.focus();
-                }
-              }}
-            />
-          ))}
-        </div>
-        {errors[`${name}0`] && <p className="text-red-600 text-xs mt-1">All digits required</p>}
+  // Enhanced DigitBoxes with backspace navigation & horizontal scroll on mobile
+const DigitBoxes = ({ name, count, label }) => {
+  return (
+    <div>
+      <label className="block text-sm font-bold mb-2 text-gray-700">{label} *</label>
+      <div className="flex flex-nowrap gap-1 sm:gap-2">
+        {[...Array(count)].map((_, i) => (
+          <input
+            key={i}
+            type="text"
+            maxLength="1"
+            {...register(`${name}${i}`, {
+              required: `${label} digit ${i+1} required`,
+              pattern: { value: /^[0-9]$/, message: "Only digits" }
+            })}
+            className="w-6 h-8 sm:w-10 sm:h-12 text-center border-2 rounded-lg text-sm sm:text-lg font-bold focus:ring-2 shrink-0"
+            style={{ borderColor: '#B8860B', outlineColor: '#800020' }}
+            onKeyDown={(e) => {
+              const target = e.target;
+              if (e.key === 'Backspace' && target.value === '' && i > 0) {
+                const prevInput = target.parentElement.children[i - 1];
+                if (prevInput) prevInput.focus();
+              }
+            }}
+            onInput={(e) => {
+              if (e.target.value && i < count - 1) {
+                const nextInput = e.target.parentElement.children[i + 1];
+                if (nextInput) nextInput.focus();
+              }
+            }}
+          />
+        ))}
       </div>
-    );
-  };
+      {errors[`${name}0`] && <p className="text-red-600 text-xs mt-1">All digits required</p>}
+    </div>
+  );
+};
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6" style={{ backgroundColor: '#f8f7f3' }}>
@@ -338,10 +338,10 @@ const JuniorAdmissionForm = () => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              {/* <button type="button" onClick={quickFillForm} className="text-sm px-4 py-2 rounded-full transition-all flex items-center justify-center gap-2" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>
+              <button type="button" onClick={quickFillForm} className="text-sm px-4 py-2 rounded-full transition-all flex items-center justify-center gap-2" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>
                 <RefreshCcw size={16} /> Quick Fill Demo
-              </button> */}
-              {/* <span className="text-sm px-4 py-2 rounded-full text-center" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>Official Application</span> */}
+              </button>
+              <span className="text-sm px-4 py-2 rounded-full text-center" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>Official Application</span>
             </div>
           </div>
 
