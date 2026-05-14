@@ -338,10 +338,10 @@ const DigitBoxes = ({ name, count, label }) => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <button type="button" onClick={quickFillForm} className="text-sm px-4 py-2 rounded-full transition-all flex items-center justify-center gap-2" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>
+              {/* <button type="button" onClick={quickFillForm} className="text-sm px-4 py-2 rounded-full transition-all flex items-center justify-center gap-2" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>
                 <RefreshCcw size={16} /> Quick Fill Demo
-              </button>
-              <span className="text-sm px-4 py-2 rounded-full text-center" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>Official Application</span>
+              </button> */}
+              {/* <span className="text-sm px-4 py-2 rounded-full text-center" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>Official Application</span> */}
             </div>
           </div>
 
@@ -576,7 +576,7 @@ const DigitBoxes = ({ name, count, label }) => {
                 </section>
 
                 <div className="flex justify-center pt-6">
-                  <button type="submit" disabled={isSubmitting} className="text-white text-lg px-12 py-5 rounded-full font-bold shadow-2xl flex items-center gap-3 transition-all" style={{ backgroundColor: '#800020' }} onMouseEnter={(e) => e.target.style.backgroundColor = '#600015'} onMouseLeave={(e) => e.target.style.backgroundColor = '#800020'}><Save size={24} /> Generate Application PDF</button>
+                  <button type="submit" disabled={isSubmitting} className="text-white text-lg px-12 py-5 rounded-full font-bold shadow-2xl flex items-center gap-3 transition-all" style={{ backgroundColor: '#800020' }} onMouseEnter={(e) => e.target.style.backgroundColor = '#600015'} onMouseLeave={(e) => e.target.style.backgroundColor = '#800020'}> Generate Application PDF</button>
                 </div>
               </form>
             ) : (
@@ -586,8 +586,8 @@ const DigitBoxes = ({ name, count, label }) => {
                 <p className="text-lg mb-4" style={{ color: '#002147' }}>Application No: <span className="font-bold" style={{ color: '#B8860B' }}>{formData.appNo}</span></p>
                 <p className="text-gray-600 mb-10 max-w-2xl mx-auto">Your admission form for <strong>{formData.standard} {formData.stream}</strong> has been generated successfully. Please download the PDF, print it, affix your photograph, and sign at designated places.</p>
                 <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
-                  <PDFDownloadLink document={<JuniorAdmissionPDF data={formData} />} fileName={`SV_Admission_${formData.surname}_${formData.fathersName}_${formData.appNo}.pdf`} className="flex items-center gap-3 text-white px-10 py-5 rounded-xl font-bold shadow-2xl transition-all transform hover:scale-105" style={{ backgroundColor: '#800020' }}>{({ loading }) => loading ? 'Generating PDF...' : (<><Download size={24} /> Download Official Application Form</>)}</PDFDownloadLink>
-                  <button onClick={resetForm} className="flex items-center gap-3 px-8 py-5 font-semibold border-2 rounded-xl transition-all" style={{ borderColor: '#B8860B', color: '#002147' }}><RefreshCcw size={20} /> Fill Another Form</button>
+                  <PDFDownloadLink document={<JuniorAdmissionPDF data={formData} />} fileName={`SV_Admission_${formData.surname}_${formData.fathersName}_${formData.appNo}.pdf`} className="flex items-center gap-3 text-white px-10 py-5 rounded-xl font-bold shadow-2xl transition-all transform hover:scale-105" style={{ backgroundColor: '#800020' }}>{({ loading }) => loading ? 'Generating PDF...' : (<> Download Official Application Form</>)}</PDFDownloadLink>
+                  <button onClick={resetForm} className="flex items-center gap-3 px-8 py-5 font-semibold border-2 rounded-xl transition-all" style={{ borderColor: '#B8860B', color: '#002147' }}>Fill Another Form</button>
                 </div>
                 <div className="mt-12 p-6 rounded-xl max-w-2xl mx-auto border-2" style={{ backgroundColor: '#f0f4f8', borderColor: '#002147' }}>
                   <h4 className="font-bold mb-3" style={{ color: '#002147' }}>Next Steps:</h4>
