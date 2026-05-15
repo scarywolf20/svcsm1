@@ -497,7 +497,7 @@ const SeniorAdmissionForm = () => {
                 </section>
 
                 <div className="flex justify-center pt-6">
-                  <button type="submit" disabled={isSubmitting} className="text-white text-lg px-12 py-5 rounded-full font-bold shadow-2xl flex items-center gap-3 transition-all" style={{ backgroundColor: '#800020' }} onMouseEnter={(e) => e.target.style.backgroundColor = '#600015'} onMouseLeave={(e) => e.target.style.backgroundColor = '#800020'}> Generate Application PDF</button>
+                  <button type="submit" disabled={isSubmitting} className="text-white text-lg px-12 py-5 rounded-full font-bold shadow-2xl flex items-center gap-3 transition-all" style={{ backgroundColor: '#800020' }} onMouseEnter={(e) => e.target.style.backgroundColor = '#600015'} onMouseLeave={(e) => e.target.style.backgroundColor = '#800020'}>Generate Application PDF</button>
                 </div>
               </form>
             ) : (
