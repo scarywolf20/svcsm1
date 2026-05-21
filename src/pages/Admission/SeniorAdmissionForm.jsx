@@ -504,7 +504,7 @@ const SeniorAdmissionForm = () => {
               <div className="text-center py-16">
                 <div className="w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg" style={{ backgroundColor: '#f0f4f8', color: '#800020' }}><CheckCircle size={64} /></div>
                 <h2 className="text-4xl font-bold mb-3" style={{ color: '#002147' }}>Application Generated Successfully!</h2>
-                <p className="text-lg mb-4" style={{ color: '#002147' }}>Application No: <span className="font-bold" style={{ color: '#B8860B' }}>{formData.appNo}</span></p>
+                <p className="text-lg mb-4" style={{ color: '#002147' }}>Application No:<span className="font-bold" style={{ color: '#B8860B' }}>{formData.appNo}</span></p>
                 <p className="text-gray-600 mb-10 max-w-2xl mx-auto">Your admission form for <strong>{getCourseName()}</strong> has been generated successfully. Please download the PDF, print it, affix your photograph, and sign at designated places.</p>
                 <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
                   <PDFDownloadLink document={<SeniorAdmissionPDF data={formData} />} fileName={`SVIM_Admission_${formData.lastName}_${formData.firstName}_${formData.appNo}.pdf`} className="flex items-center gap-3 text-white px-10 py-5 rounded-xl font-bold shadow-2xl transition-all transform hover:scale-105" style={{ backgroundColor: '#800020' }}>{({ loading }) => loading ? 'Generating PDF...' : (<> Download Official Application Form</>)}</PDFDownloadLink>
