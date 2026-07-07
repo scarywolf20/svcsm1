@@ -7,6 +7,12 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import SEO from '../../components/SEO';
 
+const isBComDisabled = () => {
+  const now = new Date();
+  const deadline = new Date('2026-07-08T13:00:00+05:30');
+  return now >= deadline;
+};
+
 const SeniorAdmissionForm = () => {
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting }, reset } = useForm();
   const [formData, setFormData] = useState(null);
@@ -331,11 +337,25 @@ const SeniorAdmissionForm = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-bold mb-3 text-gray-700">Course *</label>
-                      <select {...register("course", { required: "Please select a course" })} className="w-full p-3 border-2 rounded-lg focus:ring-2" style={{ borderColor: '#B8860B' }}>
+                      <select
+                        {...register("course", {
+                          required: "Please select a course",
+                          validate: (val) => {
+                            if (val === 'BCOM' && isBComDisabled()) {
+                              return "Applications for B.Com are closed.";
+                            }
+                            return true;
+                          }
+                        })}
+                        className="w-full p-3 border-2 rounded-lg focus:ring-2"
+                        style={{ borderColor: '#B8860B' }}
+                      >
                         <option value="">Select Course</option>
                         <option value="BBA">BBA</option>
                         <option value="BCA">BCA</option>
-                        <option value="BCOM">B.COM</option>
+                        <option value="BCOM" disabled={isBComDisabled()}>
+                          B.COM {isBComDisabled() && ' (Closed)'}
+                        </option>
                         <option value="BA">BA</option>
                       </select>
                       {errors.course && <p className="text-red-600 text-xs mt-2">{errors.course.message}</p>}
