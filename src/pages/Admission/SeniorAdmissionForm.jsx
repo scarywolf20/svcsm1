@@ -7,14 +7,22 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import SEO from '../../components/SEO';
 
-const isBComDisabled = () => {
+const isAdmissionClosed = (course, year) => {
   const now = new Date();
-  const deadline = new Date('2026-07-08T13:00:00+05:30');
-  return now >= deadline;
+  const deadline = new Date('2026-07-08T13:00:00+05:30'); // July 8th, 1:00 PM IST
+  
+  if (now < deadline) return false;
+  
+  // From 1 PM on July 8, SY and TY for BCOM and BA are disabled
+  if ((course === 'BCOM' || course === 'BA') && (year === 'SY' || year === 'TY')) {
+    return true;
+  }
+  
+  return false;
 };
 
 const SeniorAdmissionForm = () => {
-  const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting }, reset } = useForm();
+  const { register, handleSubmit, watch, setValue, trigger, formState: { errors, isSubmitting }, reset } = useForm();
   const [formData, setFormData] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
@@ -327,7 +335,18 @@ const SeniorAdmissionForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-bold mb-3 text-gray-700">Year *</label>
-                      <select {...register("year", { required: "Please select a year" })} className="w-full p-3 border-2 rounded-lg focus:ring-2" style={{ borderColor: '#B8860B' }}>
+                      <select
+                        {...register("year", {
+                          required: "Please select a year",
+                          onChange: () => {
+                            if (selectedCourse) {
+                              trigger("course");
+                            }
+                          }
+                        })}
+                        className="w-full p-3 border-2 rounded-lg focus:ring-2"
+                        style={{ borderColor: '#B8860B' }}
+                      >
                         <option value="">Select Year</option>
                         <option value="FY">First Year (FY)</option>
                         <option value="SY">Second Year (SY)</option>
@@ -341,8 +360,8 @@ const SeniorAdmissionForm = () => {
                         {...register("course", {
                           required: "Please select a course",
                           validate: (val) => {
-                            if (val === 'BCOM' && isBComDisabled()) {
-                              return "Applications for B.Com are closed.";
+                            if (isAdmissionClosed(val, selectedYear)) {
+                              return `Applications for ${val === 'BCOM' ? 'B.Com' : val} (${selectedYear}) are closed.`;
                             }
                             return true;
                           }
@@ -353,10 +372,12 @@ const SeniorAdmissionForm = () => {
                         <option value="">Select Course</option>
                         <option value="BBA">BBA</option>
                         <option value="BCA">BCA</option>
-                        <option value="BCOM" disabled={isBComDisabled()}>
-                          B.COM {isBComDisabled() && ' (Closed)'}
+                        <option value="BCOM" disabled={isAdmissionClosed('BCOM', selectedYear)}>
+                          B.COM {isAdmissionClosed('BCOM', selectedYear) && ' (Closed for SY/TY)'}
                         </option>
-                        <option value="BA">BA</option>
+                        <option value="BA" disabled={isAdmissionClosed('BA', selectedYear)}>
+                          BA {isAdmissionClosed('BA', selectedYear) && ' (Closed for SY/TY)'}
+                        </option>
                       </select>
                       {errors.course && <p className="text-red-600 text-xs mt-2">{errors.course.message}</p>}
                     </div>
