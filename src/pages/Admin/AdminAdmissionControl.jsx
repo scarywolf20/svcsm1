@@ -83,12 +83,40 @@ const AdminAdmissionControl = () => {
           return;
         }
         const data = snap.data() || {};
-        setStatus({
+        const initialStatus = {
           senior: { ...DEFAULT_STATUS.senior, ...(data.senior || {}) },
           junior: { ...DEFAULT_STATUS.junior, ...(data.junior || {}) },
           hybrid: { ...DEFAULT_STATUS.hybrid, ...(data.hybrid || {}) },
-        });
-        setSchedules(data.schedules || []);
+        };
+        const initialSchedules = data.schedules || [];
+        
+        // Auto-apply past schedules on initial load too
+        const now = new Date();
+        const pastSchedules = initialSchedules.filter(s => now >= new Date(s.at));
+        if (pastSchedules.length > 0) {
+          const updatedStatus = { ...initialStatus };
+          const remainingSchedules = initialSchedules.filter(s => now < new Date(s.at));
+          for (const sch of pastSchedules) {
+            const [section, key] = sch.target.split('.');
+            if (updatedStatus[section] !== undefined) {
+              updatedStatus[section] = { ...updatedStatus[section], [key]: sch.action };
+            }
+          }
+          setStatus(updatedStatus);
+          setSchedules(remainingSchedules);
+          // Save the clean applied state to Firestore automatically
+          setDoc(docRef, {
+            ...data,
+            senior: updatedStatus.senior,
+            junior: updatedStatus.junior,
+            hybrid: updatedStatus.hybrid,
+            schedules: remainingSchedules,
+            updatedAt: serverTimestamp(),
+          });
+        } else {
+          setStatus(initialStatus);
+          setSchedules(initialSchedules);
+        }
         setIsLoading(false);
       } catch (e) {
         if (!ignore) {
@@ -99,7 +127,50 @@ const AdminAdmissionControl = () => {
     };
 
     load();
-    return () => { ignore = true; };
+
+    // Check every 5 seconds for newly past-due schedules and apply/clean them up automatically
+    const interval = setInterval(() => {
+      setSchedules((currentSchedules) => {
+        const now = new Date();
+        const past = currentSchedules.filter((s) => now >= new Date(s.at));
+        if (past.length > 0) {
+          const remaining = currentSchedules.filter((s) => now < new Date(s.at));
+          setStatus((currentStatus) => {
+            const updatedStatus = {
+              senior: { ...currentStatus.senior },
+              junior: { ...currentStatus.junior },
+              hybrid: { ...currentStatus.hybrid },
+            };
+            for (const sch of past) {
+              const [section, key] = sch.target.split('.');
+              if (updatedStatus[section] !== undefined) {
+                updatedStatus[section] = { ...updatedStatus[section], [key]: sch.action };
+              }
+            }
+            // Auto-persist the update to Firestore
+            setDoc(docRef, {
+              senior: updatedStatus.senior,
+              junior: updatedStatus.junior,
+              hybrid: updatedStatus.hybrid,
+              schedules: remaining,
+              updatedAt: serverTimestamp(),
+            }).then(() => {
+              success('Schedule Triggered', `${past.length} scheduled change(s) auto-applied and saved.`);
+            }).catch((err) => {
+              console.error('Failed to auto-save scheduled update:', err);
+            });
+            return updatedStatus;
+          });
+          return remaining;
+        }
+        return currentSchedules;
+      });
+    }, 5000);
+
+    return () => {
+      ignore = true;
+      clearInterval(interval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docRef]);
 
