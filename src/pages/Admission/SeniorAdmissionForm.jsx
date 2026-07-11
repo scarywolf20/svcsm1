@@ -9,12 +9,16 @@ import SEO from '../../components/SEO';
 
 const isAdmissionClosed = (course, year) => {
   const now = new Date();
-  const deadline = new Date('2026-07-08T13:00:00+05:30'); // July 8th, 1:00 PM IST
-  
-  if (now < deadline) return false;
   
   // From 1 PM on July 8, SY and TY for BCOM and BA are disabled
-  if ((course === 'BCOM' || course === 'BA') && (year === 'SY' || year === 'TY')) {
+  const deadline1 = new Date('2026-07-08T13:00:00+05:30');
+  if (now >= deadline1 && (course === 'BCOM' || course === 'BA') && (year === 'SY' || year === 'TY')) {
+    return true;
+  }
+  
+  // From 5 PM on July 11, SY and TY for BBA are disabled
+  const deadline2 = new Date('2026-07-11T17:00:00+05:30');
+  if (now >= deadline2 && course === 'BBA' && (year === 'SY' || year === 'TY')) {
     return true;
   }
   
@@ -370,7 +374,9 @@ const SeniorAdmissionForm = () => {
                         style={{ borderColor: '#B8860B' }}
                       >
                         <option value="">Select Course</option>
-                        <option value="BBA">BBA</option>
+                        <option value="BBA" disabled={isAdmissionClosed('BBA', selectedYear)}>
+                          BBA {isAdmissionClosed('BBA', selectedYear) && ' (Closed for SY/TY)'}
+                        </option>
                         <option value="BCA">BCA</option>
                         <option value="BCOM" disabled={isAdmissionClosed('BCOM', selectedYear)}>
                           B.COM {isAdmissionClosed('BCOM', selectedYear) && ' (Closed for SY/TY)'}
