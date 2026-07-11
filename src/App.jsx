@@ -46,6 +46,7 @@ import AdminFaculty from "./pages/Admin/AdminFaculty";
 import AdminActivitiesEvents from "./pages/Admin/AdminActivitiesEvents";
 import AdminTestimonials from "./pages/Admin/AdminTestimonials";
 import AdminGallery from "./pages/Admin/AdminGallery";
+import AdminAdmissionControl from "./pages/Admin/AdminAdmissionControl";
 
 import TestAdmissionForm from "./pages/Admission/TestAddForm";
 import JuniorAdmissionPDF from "./components/PDF/JuniorAdmissionPDF";
@@ -154,6 +155,7 @@ const Layout = () => {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="junior-admissions" element={<AdminJuniorAdmissions />} />
           <Route path="senior-admissions" element={<AdminSeniorAdmissions />} />
+          <Route path="admission-control" element={<AdminAdmissionControl />} />
           <Route path="hero" element={<AdminHeroSettings />} />
           <Route path="faculty" element={<AdminFaculty />} />
           <Route path="activities" element={<AdminActivitiesEvents />} />

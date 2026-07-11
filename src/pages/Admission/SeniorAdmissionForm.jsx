@@ -1,29 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { FileText, Save, Download, CheckCircle, RefreshCcw, Upload } from 'lucide-react';
 import SeniorAdmissionPDF from '../../components/PDF/SeniorAdmissionPDF';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import SEO from '../../components/SEO';
 
-const isAdmissionClosed = (course, year) => {
-  const now = new Date();
-  
-  // From 1 PM on July 8, SY and TY for BCOM and BA are disabled
-  const deadline1 = new Date('2026-07-08T13:00:00+05:30');
-  if (now >= deadline1 && (course === 'BCOM' || course === 'BA') && (year === 'SY' || year === 'TY')) {
-    return true;
-  }
-  
-  // From 5 PM on July 11, SY and TY for BBA are disabled
-  const deadline2 = new Date('2026-07-11T17:00:00+05:30');
-  if (now >= deadline2 && course === 'BBA' && (year === 'SY' || year === 'TY')) {
-    return true;
-  }
-  
-  return false;
-};
 
 const SeniorAdmissionForm = () => {
   const { register, handleSubmit, watch, setValue, trigger, formState: { errors, isSubmitting }, reset } = useForm();
@@ -31,6 +14,49 @@ const SeniorAdmissionForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [admissionStatus, setAdmissionStatus] = useState(null);
+
+  // Fetch admission open/closed status from Firestore and apply schedules
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'siteContent', 'admissionStatus'));
+        if (!ignore && snap.exists()) {
+          const data = snap.data();
+          // Apply any past-due schedules client-side
+          const now = new Date();
+          const processed = {
+            senior: { ...(data.senior || {}) },
+            junior: { ...(data.junior || {}) },
+            hybrid: { ...(data.hybrid || {}) },
+          };
+          if (Array.isArray(data.schedules)) {
+            for (const sch of data.schedules) {
+              if (now >= new Date(sch.at)) {
+                const [section, key] = sch.target.split('.');
+                if (processed[section] !== undefined) {
+                  processed[section] = { ...processed[section], [key]: sch.action };
+                }
+              }
+            }
+          }
+          setAdmissionStatus(processed);
+        }
+      } catch (e) {
+        console.error('Failed to load admission status:', e);
+      }
+    };
+    load();
+    return () => { ignore = true; };
+  }, []);
+
+  // Helper: check if a specific course+year is closed
+  const isCourseClosed = (course, year) => {
+    if (!admissionStatus?.senior) return false; // default open if not loaded yet
+    const key = `${year}_${course}`;
+    return admissionStatus.senior[key] === false;
+  };
 
   const selectedYear = watch("year");
   const selectedCourse = watch("course");
@@ -364,7 +390,7 @@ const SeniorAdmissionForm = () => {
                         {...register("course", {
                           required: "Please select a course",
                           validate: (val) => {
-                            if (isAdmissionClosed(val, selectedYear)) {
+                            if (isCourseClosed(val, selectedYear)) {
                               return `Applications for ${val === 'BCOM' ? 'B.Com' : val} (${selectedYear}) are closed.`;
                             }
                             return true;
@@ -374,19 +400,22 @@ const SeniorAdmissionForm = () => {
                         style={{ borderColor: '#B8860B' }}
                       >
                         <option value="">Select Course</option>
-                        <option value="BBA" disabled={isAdmissionClosed('BBA', selectedYear)}>
-                          BBA {isAdmissionClosed('BBA', selectedYear) && ' (Closed for SY/TY)'}
+                        <option value="BBA" disabled={isCourseClosed('BBA', selectedYear)}>
+                          BBA {isCourseClosed('BBA', selectedYear) && ' (Closed)'}
                         </option>
-                        <option value="BCA">BCA</option>
-                        <option value="BCOM" disabled={isAdmissionClosed('BCOM', selectedYear)}>
-                          B.COM {isAdmissionClosed('BCOM', selectedYear) && ' (Closed for SY/TY)'}
+                        <option value="BCA" disabled={isCourseClosed('BCA', selectedYear)}>
+                          BCA {isCourseClosed('BCA', selectedYear) && ' (Closed)'}
                         </option>
-                        <option value="BA" disabled={isAdmissionClosed('BA', selectedYear)}>
-                          BA {isAdmissionClosed('BA', selectedYear) && ' (Closed for SY/TY)'}
+                        <option value="BCOM" disabled={isCourseClosed('BCOM', selectedYear)}>
+                          B.COM {isCourseClosed('BCOM', selectedYear) && ' (Closed)'}
+                        </option>
+                        <option value="BA" disabled={isCourseClosed('BA', selectedYear)}>
+                          BA {isCourseClosed('BA', selectedYear) && ' (Closed)'}
                         </option>
                       </select>
                       {errors.course && <p className="text-red-600 text-xs mt-2">{errors.course.message}</p>}
                     </div>
+                    {admissionStatus?.hybrid?.senior !== false && (
                     <div className="md:col-span-2">
                       <label className="flex items-center gap-2 cursor-pointer p-4 rounded-lg bg-orange-50 border-2" style={{ borderColor: '#B8860B' }}>
                         <input type="checkbox" {...register("isHybrid")} className="w-6 h-6 cursor-pointer" style={{ accentColor: '#B8860B' }} />
@@ -396,6 +425,7 @@ const SeniorAdmissionForm = () => {
                         </div>
                       </label>
                     </div>
+                    )}
                   </div>
                   <div className="mt-6">
                     <label className="block text-sm font-bold mb-2 text-gray-700">Upload Photo</label>

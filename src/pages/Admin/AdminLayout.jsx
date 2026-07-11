@@ -33,6 +33,7 @@ const AdminLayout = () => {
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/junior-admissions', label: 'Junior Admissions', icon: Users },
     { path: '/admin/senior-admissions', label: 'Senior Admissions', icon: Users },
+    { path: '/admin/admission-control', label: 'Admission Control', icon: Settings },
     { path: '/admin/hero', label: 'Hero Section', icon: Image },
     { path: '/admin/faculty', label: 'Faculty', icon: GraduationCap },
     { path: '/admin/activities', label: 'Activities & Events', icon: Calendar },

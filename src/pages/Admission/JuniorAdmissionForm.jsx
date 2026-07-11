@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { FileText, Save, Download, CheckCircle, RefreshCcw, Upload } from 'lucide-react';
 import JuniorAdmissionPDF from '../../components/PDF/JuniorAdmissionPDF';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import SEO from '../../components/SEO';
 
@@ -13,10 +13,61 @@ const JuniorAdmissionForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [admissionStatus, setAdmissionStatus] = useState(null);
 
   const selectedStandard = watch("standard");
   const selectedStream = watch("stream");
   const isHybrid = watch("isHybrid");
+
+  // Fetch admission open/closed status from Firestore and apply schedules
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'siteContent', 'admissionStatus'));
+        if (!ignore && snap.exists()) {
+          const data = snap.data();
+          // Apply any past-due schedules client-side
+          const now = new Date();
+          const processed = {
+            senior: { ...(data.senior || {}) },
+            junior: { ...(data.junior || {}) },
+            hybrid: { ...(data.hybrid || {}) },
+          };
+          if (Array.isArray(data.schedules)) {
+            for (const sch of data.schedules) {
+              if (now >= new Date(sch.at)) {
+                const [section, key] = sch.target.split('.');
+                if (processed[section] !== undefined) {
+                  processed[section] = { ...processed[section], [key]: sch.action };
+                }
+              }
+            }
+          }
+          setAdmissionStatus(processed);
+        }
+      } catch (e) {
+        console.error('Failed to load admission status:', e);
+      }
+    };
+    load();
+    return () => { ignore = true; };
+  }, []);
+
+  // Helper: check if a specific standard+stream combo is closed
+  const isJuniorClosed = (std, stream) => {
+    if (!admissionStatus?.junior) return false;
+    const key = `${std}_${stream}`;
+    return admissionStatus.junior[key] === false;
+  };
+
+  // Helper: check if ALL streams for a given standard are closed
+  const isAllStreamsClosed = (std) => {
+    if (!admissionStatus?.junior) return false;
+    return ['Science', 'Commerce', 'Arts', 'CET'].every(
+      (stream) => admissionStatus.junior[`${std}_${stream}`] === false
+    );
+  };
 
   // Real-time percentage calculation
   const sscMarksObtained = watch("sscMarksObtained");
@@ -358,13 +409,13 @@ const DigitBoxes = ({ name, count, label }) => {
                     <div>
                       <label className="block text-sm font-bold mb-3 text-gray-700">Standard *</label>
                       <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 md:gap-12">
-                        <label className="flex items-center gap-3 cursor-pointer">
-                          <input type="radio" value="11th" {...register("standard", { required: "Please select a standard" })} className="w-6 h-6 cursor-pointer" style={{ accentColor: '#B8860B' }} />
-                          <span className="text-gray-800 font-bold text-lg">11th Standard</span>
+                        <label className={`flex items-center gap-3 ${isAllStreamsClosed('11th') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                          <input type="radio" value="11th" {...register("standard", { required: "Please select a standard", validate: (val) => isAllStreamsClosed(val) ? `All admissions for ${val} are currently closed.` : true })} className="w-6 h-6 cursor-pointer" style={{ accentColor: '#B8860B' }} disabled={isAllStreamsClosed('11th')} />
+                          <span className="text-gray-800 font-bold text-lg">11th Standard{isAllStreamsClosed('11th') && <span className="text-red-500 text-sm ml-2">(Closed)</span>}</span>
                         </label>
-                        <label className="flex items-center gap-3 cursor-pointer">
-                          <input type="radio" value="12th" {...register("standard", { required: "Please select a standard" })} className="w-6 h-6 cursor-pointer" style={{ accentColor: '#B8860B' }} />
-                          <span className="text-gray-800 font-bold text-lg">12th Standard</span>
+                        <label className={`flex items-center gap-3 ${isAllStreamsClosed('12th') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                          <input type="radio" value="12th" {...register("standard", { required: "Please select a standard", validate: (val) => isAllStreamsClosed(val) ? `All admissions for ${val} are currently closed.` : true })} className="w-6 h-6 cursor-pointer" style={{ accentColor: '#B8860B' }} disabled={isAllStreamsClosed('12th')} />
+                          <span className="text-gray-800 font-bold text-lg">12th Standard{isAllStreamsClosed('12th') && <span className="text-red-500 text-sm ml-2">(Closed)</span>}</span>
                         </label>
                       </div>
                       {errors.standard && <p className="text-red-600 text-xs mt-2">{errors.standard.message}</p>}
@@ -373,12 +424,15 @@ const DigitBoxes = ({ name, count, label }) => {
                     <div>
                       <label className="block text-sm font-bold mb-3 text-gray-700">Stream/Subject *</label>
                       <div className="flex flex-wrap gap-8 md:gap-12">
-                        {["Science","Commerce","Arts","CET"].map(stream => (
-                          <label key={stream} className="flex items-center gap-3 cursor-pointer">
-                            <input type="radio" value={stream} {...register("stream", { required: "Please select a stream" })} className="w-6 h-6 cursor-pointer" style={{ accentColor: '#B8860B' }} />
-                            <span className="text-gray-800 font-bold text-lg">{stream}{stream==="CET"?" Batch":""}</span>
-                          </label>
-                        ))}
+                        {["Science","Commerce","Arts","CET"].map(stream => {
+                          const closed = selectedStandard ? isJuniorClosed(selectedStandard, stream) : false;
+                          return (
+                            <label key={stream} className={`flex items-center gap-3 ${closed ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                              <input type="radio" value={stream} {...register("stream", { required: "Please select a stream", validate: (val) => (selectedStandard && isJuniorClosed(selectedStandard, val)) ? `Admissions for ${selectedStandard} ${val} are currently closed.` : true })} className="w-6 h-6 cursor-pointer" style={{ accentColor: '#B8860B' }} disabled={closed} />
+                              <span className="text-gray-800 font-bold text-lg">{stream}{stream==="CET"?" Batch":""}{closed && <span className="text-red-500 text-sm ml-2">(Closed)</span>}</span>
+                            </label>
+                          );
+                        })}
                       </div>
                       {errors.stream && <p className="text-red-600 text-xs mt-2">{errors.stream.message}</p>}
                     </div>
@@ -390,7 +444,7 @@ const DigitBoxes = ({ name, count, label }) => {
                       </label>
                     </div>
 
-                    {selectedStream !== 'CET' && (
+                    {selectedStream !== 'CET' && admissionStatus?.hybrid?.junior !== false && (
                       <div>
                         <label className="flex items-center gap-2 cursor-pointer p-4 rounded-lg bg-orange-50 border-2" style={{ borderColor: '#B8860B' }}>
                           <input type="checkbox" {...register("isHybrid")} className="w-6 h-6 cursor-pointer" style={{ accentColor: '#B8860B' }} />
