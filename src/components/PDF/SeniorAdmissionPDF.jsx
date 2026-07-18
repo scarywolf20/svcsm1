@@ -407,14 +407,24 @@ const SeniorAdmissionPDF = ({ data }) => {
 
   const getFees = () => {
     const baseFees = courseStructure[data.year]?.[data.course];
+    let fees = baseFees;
     if (data.isHybrid && hybridFees[data.course] && baseFees) {
-      return {
+      fees = {
         ...baseFees,
         ...hybridFees[data.course],
         name: `${baseFees.name} (Hybrid)`,
       };
     }
-    return baseFees;
+    const fine = Number(data.lateFineAmount) || 0;
+    if (fees && fine > 0) {
+      return {
+        ...fees,
+        total: fees.total + fine,
+        oneTime: fees.oneTime + fine,
+        inst1: fees.inst1 + fine,
+      };
+    }
+    return fees;
   };
 
   const currentFees = getFees();
@@ -693,7 +703,7 @@ const SeniorAdmissionPDF = ({ data }) => {
         {currentFees && (
           <>
             <Text style={{ ...styles.sectionTitle, marginTop: 0 }}>FEE STRUCTURE - {currentFees.name}</Text>
-            <View style={styles.feeTableContainer}>
+            <View style={styles.feeTableContainer} wrap={false}>
               <View style={styles.feeTableRow}>
                 <View style={{ ...styles.feeTableHeaderCell, flex: 2 }}>
                   <Text>Fee Type</Text>
@@ -734,6 +744,16 @@ const SeniorAdmissionPDF = ({ data }) => {
                   <Text>Rs. {currentFees.exam}</Text>
                 </View>
               </View>
+              {Number(data.lateFineAmount) > 0 && (
+                <View style={styles.feeTableRow}>
+                  <View style={{ ...styles.feeTableDataCell, flex: 2 }}>
+                    <Text>Late Fine</Text>
+                  </View>
+                  <View style={styles.feeTableDataCellLast}>
+                    <Text>Rs. {data.lateFineAmount}</Text>
+                  </View>
+                </View>
+              )}
               <View style={styles.feeTableRow}>
                 <View style={{ ...styles.feeTableDataCell, flex: 2, backgroundColor: '#D9D9D9' }}>
                   <Text style={{ fontFamily: 'Times-Bold', color: '#002147' }}>TOTAL FEES</Text>
@@ -744,7 +764,7 @@ const SeniorAdmissionPDF = ({ data }) => {
               </View>
             </View>
 
-            <View style={styles.feeTableContainer}>
+            <View style={styles.feeTableContainer} wrap={false}>
               <View style={styles.feeTableRow}>
                 <View style={{ ...styles.feeTableHeaderCell, flex: 2 }}>
                   <Text>Payment Mode</Text>

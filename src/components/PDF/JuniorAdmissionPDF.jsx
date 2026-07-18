@@ -271,8 +271,8 @@ const styles = StyleSheet.create({
 
   // Fee Distribution Table Styles
   feeTableContainer: {
-    marginTop: 12,
-    marginBottom: 12,
+    marginTop: 4,
+    marginBottom: 4,
     borderWidth: 1,
     borderColor: '#999'
   },
@@ -280,25 +280,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#999',
-    minHeight: 24
+    minHeight: 16
   },
   feeTableHeaderCell: {
     flex: 1,
     borderRightWidth: 1,
     borderRightColor: '#999',
-    padding: 6,
+    padding: 3,
     backgroundColor: '#c0c0c0',
     fontFamily: 'Times-Bold',
-    fontSize: 9,
+    fontSize: 8,
     textAlign: 'center',
     justifyContent: 'center'
   },
   feeTableHeaderCellLast: {
     flex: 1,
-    padding: 6,
+    padding: 3,
     backgroundColor: '#c0c0c0',
     fontFamily: 'Times-Bold',
-    fontSize: 9,
+    fontSize: 8,
     textAlign: 'center',
     justifyContent: 'center'
   },
@@ -306,17 +306,17 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRightWidth: 1,
     borderRightColor: '#999',
-    padding: 6,
+    padding: 3,
     backgroundColor: '#e8e8e8',
-    fontSize: 9,
+    fontSize: 8,
     textAlign: 'center',
     justifyContent: 'center'
   },
   feeTableDataCellLast: {
     flex: 1,
-    padding: 6,
+    padding: 3,
     backgroundColor: '#e8e8e8',
-    fontSize: 9,
+    fontSize: 8,
     textAlign: 'center',
     justifyContent: 'center'
   },
@@ -360,65 +360,65 @@ const styles = StyleSheet.create({
 
   // Declaration Section
   declarationSection: { 
-    marginTop: 15,
-    paddingTop: 12
+    marginTop: 8,
+    paddingTop: 6
   },
   declTitle: { 
-    fontSize: 13, 
+    fontSize: 10, 
     fontFamily: 'Times-Bold', 
     textAlign: 'center', 
-    marginBottom: 10,
+    marginBottom: 5,
     textDecoration: 'underline'
   },
   declPoint: {
-    fontSize: 10,
-    marginBottom: 5,
+    fontSize: 8,
+    marginBottom: 2,
     textAlign: 'justify',
-    lineHeight: 1.5
+    lineHeight: 1.15
   },
 
   // Office Use Section
   officeUse: {
-    marginTop: 12,
+    marginTop: 6,
     borderWidth: 1,
     borderColor: '#999',
-    padding: 10,
+    padding: 6,
     backgroundColor: '#f9f9f9'
   },
   officeTitle: {
-    fontSize: 11,
+    fontSize: 9,
     fontFamily: 'Times-Bold',
-    marginBottom: 6
+    marginBottom: 3
   },
   officeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 5
+    marginBottom: 3
   },
   officeField: {
-    fontSize: 10
+    fontSize: 8
   },
 
   // Submission Mode Table
   submissionTableContainer: {
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 4,
+    marginBottom: 4,
     borderWidth: 1,
     borderColor: '#999',
-    padding: 8
+    padding: 4
   },
   submissionTableRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4
+    marginBottom: 2
   },
   submissionTableHeader: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: 'Times-Bold',
     color: '#000'
   },
   submissionTableData: {
-    fontSize: 9
+    fontSize: 8
   }
 });
 
@@ -486,13 +486,27 @@ const JuniorAdmissionPDF = ({ data }) => {
       }
     };
 
+    let finalFees = null;
     if (data.isHybrid) {
-       const fees = hybridFees[stream];
-       if (fees) return fees;
+       const hFees = hybridFees[stream];
+       if (hFees) finalFees = hFees;
     }
 
-    const courseKey = `${standard}${stream === 'Science' ? 'Sci' : stream === 'Commerce' ? 'Com' : stream === 'Arts' ? 'Arts' : 'CET'}`;
-    return fees[courseKey] || fees['11thCom'];
+    if (!finalFees) {
+      const courseKey = `${standard}${stream === 'Science' ? 'Sci' : stream === 'Commerce' ? 'Com' : stream === 'Arts' ? 'Arts' : 'CET'}`;
+      finalFees = fees[courseKey] || fees['11thCom'];
+    }
+
+    const fine = Number(data.lateFineAmount) || 0;
+    if (finalFees && fine > 0) {
+      return {
+        ...finalFees,
+        total: finalFees.total + fine,
+        oneTime: finalFees.oneTime + fine,
+        inst1: finalFees.inst1 + fine,
+      };
+    }
+    return finalFees;
   };
 
   const currentFees = getFeeStructure();
@@ -895,19 +909,19 @@ const JuniorAdmissionPDF = ({ data }) => {
           <Text style={styles.declPoint}>
             8. I know that my ward will not be permitted to appear for his/her college/university examination if he/she fails to satisfy the college authorities on any of the following counts:
           </Text>
-          <Text style={{ fontSize: 9, paddingLeft: 20, marginBottom: 3 }}>
+          <Text style={{ fontSize: 8, paddingLeft: 20, marginBottom: 1 }}>
             • At least 75% attendance at lectures and practical
           </Text>
-          <Text style={{ fontSize: 9, paddingLeft: 20, marginBottom: 3 }}>
+          <Text style={{ fontSize: 8, paddingLeft: 20, marginBottom: 1 }}>
             • Attendance and performance at the college examination/tutorials
           </Text>
-          <Text style={{ fontSize: 9, paddingLeft: 20, marginBottom: 3 }}>
+          <Text style={{ fontSize: 8, paddingLeft: 20, marginBottom: 1 }}>
             • Good and disciplined behaviour in the college premises
           </Text>
-          <Text style={{ fontSize: 9, paddingLeft: 20, marginBottom: 3 }}>
+          <Text style={{ fontSize: 8, paddingLeft: 20, marginBottom: 1 }}>
             • Obedience of the instruction of teachers, staff and other college authorities
           </Text>
-          <Text style={{ fontSize: 9, paddingLeft: 20, marginBottom: 3 }}>
+          <Text style={{ fontSize: 8, paddingLeft: 20, marginBottom: 1 }}>
             • Payment of college fees as prescribed and on time
           </Text>
           <Text style={styles.declPoint}>
@@ -931,7 +945,7 @@ const JuniorAdmissionPDF = ({ data }) => {
         </View>
 
         {/* Dynamic Fee Distribution Table - Only for selected course */}
-        <View style={styles.feeTableContainer}>
+        <View style={styles.feeTableContainer} wrap={false}>
           {/* Header Row */}
           <View style={styles.feeTableRow}>
             <View style={{ ...styles.feeTableHeaderCell, flex: 2 }}>
@@ -981,6 +995,16 @@ const JuniorAdmissionPDF = ({ data }) => {
               <Text>Rs. {currentFees.exam}</Text>
             </View>
           </View>
+          {Number(data.lateFineAmount) > 0 && (
+            <View style={styles.feeTableRow}>
+              <View style={{ ...styles.feeTableDataCell, flex: 2 }}>
+                <Text>Late Fine</Text>
+              </View>
+              <View style={styles.feeTableDataCellLast}>
+                <Text>Rs. {data.lateFineAmount}</Text>
+              </View>
+            </View>
+          )}
 
           {/* Total Fees */}
           <View style={styles.feeTableRow}>
@@ -994,7 +1018,7 @@ const JuniorAdmissionPDF = ({ data }) => {
         </View>
 
         {/* Payment Mode Table */}
-        <View style={styles.submissionTableContainer}>
+        <View style={styles.submissionTableContainer} wrap={false}>
           <View style={styles.submissionTableRow}>
             <Text style={styles.submissionTableHeader}>Payment Mode (Non-refundable)</Text>
             <Text style={styles.submissionTableHeader}>Dates</Text>
@@ -1017,15 +1041,15 @@ const JuniorAdmissionPDF = ({ data }) => {
           </View>
         </View>
 
-        <Text style={{ fontSize: 10, marginTop: 6, fontFamily: 'Times-Bold', textAlign: 'center' }}>
+        <Text style={{ fontSize: 8, marginTop: 3, fontFamily: 'Times-Bold', textAlign: 'center' }}>
           Note: Admission will be finalized only after submission of all documents & full payment of fees.
         </Text>
 
         {/* Candidate & Parent Signatures */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
           <View style={{ width: '48%' }}>
-            <Text style={{ fontSize: 10, marginBottom: 2 }}>Date: ____ / ____ / ____</Text>
-            <Text style={{ fontSize: 10, marginBottom: 2 }}>Place: _______________</Text>
+            <Text style={{ fontSize: 8, marginBottom: 1 }}>Date: ____ / ____ / ____</Text>
+            <Text style={{ fontSize: 8, marginBottom: 1 }}>Place: _______________</Text>
             <Text style={styles.signLine}>(Signature of Parent/Guardian)</Text>
           </View>
           <View style={{ width: '48%', alignItems: 'flex-end' }}>
@@ -1034,18 +1058,18 @@ const JuniorAdmissionPDF = ({ data }) => {
         </View>
 
         {/* Parent Declaration */}
-        <View style={{ marginTop: 12, borderTopWidth: 1, paddingTop: 8 }}>
-          <Text style={{ fontSize: 11, fontFamily: 'Times-Bold', marginBottom: 4 }}>I hereby declare that:</Text>
-          <Text style={{ fontSize: 10, marginBottom: 2, lineHeight: 1.5 }}>
+        <View style={{ marginTop: 6, borderTopWidth: 1, paddingTop: 4 }}>
+          <Text style={{ fontSize: 9, fontFamily: 'Times-Bold', marginBottom: 2 }}>I hereby declare that:</Text>
+          <Text style={{ fontSize: 8, marginBottom: 1, lineHeight: 1.25 }}>
             1. The particulars furnished by my ward in this application form are correct to the best of my knowledge.
           </Text>
-          <Text style={{ fontSize: 10, marginBottom: 4, lineHeight: 1.5 }}>
-            2. I undertake and abide myself to pay on behalf of my ward such fees, charges etc. by due date which the college may declare from time to time. In the event of failure on my part and/or[...]
+          <Text style={{ fontSize: 8, marginBottom: 2, lineHeight: 1.25 }}>
+            2. I undertake and abide myself to pay on behalf of my ward such fees, charges etc. by due date which the college may declare from time to time.
           </Text>
           
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 4 }}>
             <View>
-              <Text style={{ fontSize: 10, marginBottom: 2 }}>Date: ____ / ____ / ____</Text>
+              <Text style={{ fontSize: 8, marginBottom: 1 }}>Date: ____ / ____ / ____</Text>
               <Text style={styles.signLine}>(Signature of Parent/Guardian)</Text>
             </View>
           </View>
@@ -1054,14 +1078,14 @@ const JuniorAdmissionPDF = ({ data }) => {
         {/* Office Use Section */}
         <View style={styles.officeUse}>
           <Text style={styles.officeTitle}>For office use only</Text>
-          <View style={{ height: 20, marginTop: 6 }}></View>
-          <View style={{ borderTopWidth: 1, borderTopColor: '#999', paddingTop: 6 }}>
+          <View style={{ height: 10, marginTop: 3 }}></View>
+          <View style={{ borderTopWidth: 1, borderTopColor: '#999', paddingTop: 4 }}>
             <View style={styles.officeRow}>
               <Text style={styles.officeField}>Date: _____________</Text>
               <Text style={styles.officeField}>Particular: _____________</Text>
               <Text style={styles.officeField}>Remark: _____________</Text>
             </View>
-            <Text style={{ ...styles.officeField, marginTop: 10, textAlign: 'right' }}>
+            <Text style={{ ...styles.officeField, marginTop: 4, textAlign: 'right' }}>
               Name, Designation & Signature with Stamp
             </Text>
           </View>

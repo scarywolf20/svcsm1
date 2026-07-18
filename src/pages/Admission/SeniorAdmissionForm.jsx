@@ -15,6 +15,7 @@ const SeniorAdmissionForm = () => {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [admissionStatus, setAdmissionStatus] = useState(null);
+  const [lateFineSettings, setLateFineSettings] = useState(null);
 
   // Fetch admission open/closed status from Firestore and apply schedules
   useEffect(() => {
@@ -24,6 +25,9 @@ const SeniorAdmissionForm = () => {
         const snap = await getDoc(doc(db, 'siteContent', 'admissionStatus'));
         if (!ignore && snap.exists()) {
           const data = snap.data();
+          if (data.lateFine) {
+            setLateFineSettings(data.lateFine);
+          }
           // Apply any past-due schedules client-side
           const now = new Date();
           const processed = {
@@ -50,6 +54,17 @@ const SeniorAdmissionForm = () => {
     load();
     return () => { ignore = true; };
   }, []);
+
+  const getLateFineAmount = () => {
+    if (lateFineSettings?.enabled && lateFineSettings?.deadline && lateFineSettings?.amount) {
+      if (new Date() > new Date(lateFineSettings.deadline)) {
+        return Number(lateFineSettings.amount) || 0;
+      }
+    }
+    return 0;
+  };
+
+  const lateFineAmount = getLateFineAmount();
 
   // Helper: check if a specific course+year is closed
   const isCourseClosed = (course, year) => {
@@ -111,14 +126,23 @@ const SeniorAdmissionForm = () => {
   const getSelectedCourseFees = () => {
     if (selectedYear && selectedCourse) {
       const baseFees = courseStructure[selectedYear]?.[selectedCourse];
+      let fees = baseFees;
       if (isHybrid && hybridFees[selectedCourse]) {
-        return {
+        fees = {
           ...baseFees,
           ...hybridFees[selectedCourse],
           name: `${baseFees.name} (Hybrid)`
         };
       }
-      return baseFees;
+      if (fees && lateFineAmount > 0) {
+        return {
+          ...fees,
+          total: fees.total + lateFineAmount,
+          oneTime: fees.oneTime + lateFineAmount,
+          inst1: fees.inst1 + lateFineAmount,
+        };
+      }
+      return fees;
     }
     return null;
   };
@@ -166,7 +190,8 @@ const SeniorAdmissionForm = () => {
       formType: 'senior',
       status: 'Pending',
       createdAt: serverTimestamp(),
-      isHybrid: !!data.isHybrid
+      isHybrid: !!data.isHybrid,
+      lateFineAmount: lateFineAmount
     };
 
     delete payload.photoData;
@@ -187,6 +212,7 @@ const SeniorAdmissionForm = () => {
       });
 
       data.submissionId = docRef.id;
+      data.lateFineAmount = lateFineAmount;
       setFormData(data);
       setIsSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -346,9 +372,9 @@ const SeniorAdmissionForm = () => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              {/* <button type="button" onClick={quickFillForm} className="text-sm px-4 py-2 rounded-full transition-all flex items-center justify-center gap-2" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>
+             {/* {/* <button type="button" onClick={quickFillForm} className="text-sm px-4 py-2 rounded-full transition-all flex items-center justify-center gap-2" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>
                 <RefreshCcw size={16} /> Quick Fill Demo
-              </button> */}
+              </button> /*} */}
               {/* <span className="text-sm px-4 py-2 rounded-full text-center" style={{ backgroundColor: 'rgba(184, 134, 11, 0.3)' }}>Official Application</span> */}
             </div>
           </div>
@@ -444,6 +470,14 @@ const SeniorAdmissionForm = () => {
                 {/* Fee Structure */}
                 {currentCourseFees && (
                   <section className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: '#fafaf8', borderColor: '#B8860B', borderWidth: '2px' }}>
+                    {lateFineAmount > 0 && (
+                      <div className="mb-5 p-4 rounded-lg bg-red-50 border-l-4 border-red-500 text-red-800 flex items-center justify-between">
+                        <div>
+                          <p className="font-bold">⚠️ Late Registration Fine Applied</p>
+                          <p className="text-sm mt-1">A late admission fine of Rs. {lateFineAmount} has been added to your fees structure because the registration deadline ({new Date(lateFineSettings.deadline).toLocaleString()}) has passed.</p>
+                        </div>
+                      </div>
+                    )}
                     <h3 className="text-xl font-bold mb-5" style={{ color: '#002147' }}>💰 Fee Structure for {currentCourseFees.name}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="overflow-x-auto">
@@ -454,6 +488,9 @@ const SeniorAdmissionForm = () => {
                             <tr className="bg-white"><td className="border p-3">Tuition Fees</td><td className="border p-3 text-right font-semibold">Rs. {currentCourseFees.tuition}</td></tr>
                             <tr className="bg-white"><td className="border p-3">Co-curricular Activities</td><td className="border p-3 text-right font-semibold">Rs. {currentCourseFees.coActivity}</td></tr>
                             <tr className="bg-white"><td className="border p-3">Exam Fees</td><td className="border p-3 text-right font-semibold">Rs. {currentCourseFees.exam}</td></tr>
+                            {lateFineAmount > 0 && (
+                              <tr className="bg-red-50 text-red-700 font-semibold"><td className="border p-3">Late Fine</td><td className="border p-3 text-right">Rs. {lateFineAmount}</td></tr>
+                            )}
                             <tr style={{ backgroundColor: '#f0f4f8' }}><td className="border p-3 font-bold">TOTAL FEES</td><td className="border p-3 text-right font-bold text-lg" style={{ color: '#800020' }}>Rs. {currentCourseFees.total}</td></tr>
                           </tbody>
                         </table>

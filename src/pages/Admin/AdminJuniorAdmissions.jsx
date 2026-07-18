@@ -190,6 +190,7 @@ const AdminJuniorAdmissions = () => {
           return parts.join(', ');
         },
       },
+      { header: 'Late Fine Amount', getValue: (r) => r?.lateFineAmount || 0 },
     ];
 
     const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');

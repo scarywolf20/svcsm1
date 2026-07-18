@@ -69,6 +69,7 @@ const AdminAdmissionControl = () => {
   const [schedules, setSchedules] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newSchedule, setNewSchedule] = useState({ target: '', action: false, at: '' });
+  const [lateFine, setLateFine] = useState({ enabled: false, amount: 0, deadline: '' });
 
   const docRef = useMemo(() => doc(db, 'siteContent', 'admissionStatus'), []);
 
@@ -89,6 +90,13 @@ const AdminAdmissionControl = () => {
           hybrid: { ...DEFAULT_STATUS.hybrid, ...(data.hybrid || {}) },
         };
         const initialSchedules = data.schedules || [];
+        if (data.lateFine) {
+          setLateFine({
+            enabled: data.lateFine.enabled ?? false,
+            amount: data.lateFine.amount ?? 0,
+            deadline: data.lateFine.deadline ?? '',
+          });
+        }
         
         // Auto-apply past schedules on initial load too
         const now = new Date();
@@ -112,7 +120,7 @@ const AdminAdmissionControl = () => {
             hybrid: updatedStatus.hybrid,
             schedules: remainingSchedules,
             updatedAt: serverTimestamp(),
-          });
+          }, { merge: true });
         } else {
           setStatus(initialStatus);
           setSchedules(initialSchedules);
@@ -154,7 +162,7 @@ const AdminAdmissionControl = () => {
               hybrid: updatedStatus.hybrid,
               schedules: remaining,
               updatedAt: serverTimestamp(),
-            }).then(() => {
+            }, { merge: true }).then(() => {
               success('Schedule Triggered', `${past.length} scheduled change(s) auto-applied and saved.`);
             }).catch((err) => {
               console.error('Failed to auto-save scheduled update:', err);
@@ -232,8 +240,9 @@ const AdminAdmissionControl = () => {
         junior: updatedStatus.junior,
         hybrid: updatedStatus.hybrid,
         schedules: remaining,
+        lateFine: lateFine,
         updatedAt: serverTimestamp(),
-      });
+      }, { merge: true });
 
       setStatus(updatedStatus);
       setSchedules(remaining);
@@ -463,6 +472,65 @@ const AdminAdmissionControl = () => {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Late Fine Configuration Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+          <h3 className="font-bold text-gray-800 text-lg">Late Fine Configuration</h3>
+          <p className="text-sm text-gray-500 mt-1">Configure admission late fine deadline and amount. Click "Save Changes" at the top to apply.</p>
+        </div>
+        <div className="p-6 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-5 rounded-xl border-2 border-gray-100 bg-gray-50/30">
+            <div className="space-y-1">
+              <p className="font-bold text-gray-800 text-lg">Late Registration Fine</p>
+              <p className={`text-sm font-medium ${lateFine.enabled ? 'text-green-600' : 'text-red-500'}`}>
+                {lateFine.enabled ? 'Active (Will apply after deadline)' : 'Inactive'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLateFine(prev => ({ ...prev, enabled: !prev.enabled }))}
+              className="group"
+              title={lateFine.enabled ? 'Click to disable' : 'Click to enable'}
+            >
+              {lateFine.enabled ? (
+                <ToggleRight className="w-12 h-12 text-green-500 transition-colors group-hover:text-green-600" />
+              ) : (
+                <ToggleLeft className="w-12 h-12 text-gray-300 transition-colors group-hover:text-gray-400" />
+              )}
+            </button>
+          </div>
+
+          {lateFine.enabled && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 rounded-xl border border-gray-100 bg-white">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  Fine Amount (in Rs.)
+                </label>
+                <input
+                  type="number"
+                  value={lateFine.amount || ''}
+                  onChange={(e) => setLateFine(prev => ({ ...prev, amount: Number(e.target.value) || 0 }))}
+                  placeholder="e.g. 500"
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
+                  min="0"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  Deadline Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={lateFine.deadline || ''}
+                  onChange={(e) => setLateFine(prev => ({ ...prev, deadline: e.target.value }))}
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
