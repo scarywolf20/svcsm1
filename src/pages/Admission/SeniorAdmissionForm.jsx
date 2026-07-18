@@ -25,8 +25,8 @@ const SeniorAdmissionForm = () => {
         const snap = await getDoc(doc(db, 'siteContent', 'admissionStatus'));
         if (!ignore && snap.exists()) {
           const data = snap.data();
-          if (data.lateFine) {
-            setLateFineSettings(data.lateFine);
+          if (data.lateFines) {
+            setLateFineSettings(data.lateFines);
           }
           // Apply any past-due schedules client-side
           const now = new Date();
@@ -55,17 +55,6 @@ const SeniorAdmissionForm = () => {
     return () => { ignore = true; };
   }, []);
 
-  const getLateFineAmount = () => {
-    if (lateFineSettings?.enabled && lateFineSettings?.deadline && lateFineSettings?.amount) {
-      if (new Date() > new Date(lateFineSettings.deadline)) {
-        return Number(lateFineSettings.amount) || 0;
-      }
-    }
-    return 0;
-  };
-
-  const lateFineAmount = getLateFineAmount();
-
   // Helper: check if a specific course+year is closed
   const isCourseClosed = (course, year) => {
     if (!admissionStatus?.senior) return false; // default open if not loaded yet
@@ -76,6 +65,20 @@ const SeniorAdmissionForm = () => {
   const selectedYear = watch("year");
   const selectedCourse = watch("course");
   const isHybrid = watch("isHybrid");
+
+  const getLateFineAmount = () => {
+    if (selectedYear && selectedCourse && lateFineSettings?.senior) {
+      const config = lateFineSettings.senior[`${selectedYear}_${selectedCourse}`];
+      if (config?.enabled && config?.deadline && config?.amount) {
+        if (new Date() > new Date(config.deadline)) {
+          return Number(config.amount) || 0;
+        }
+      }
+    }
+    return 0;
+  };
+
+  const lateFineAmount = getLateFineAmount();
 
   const courseStructure = {
     'FY': {
@@ -474,7 +477,7 @@ const SeniorAdmissionForm = () => {
                       <div className="mb-5 p-4 rounded-lg bg-red-50 border-l-4 border-red-500 text-red-800 flex items-center justify-between">
                         <div>
                           <p className="font-bold">⚠️ Late Registration Fine Applied</p>
-                          <p className="text-sm mt-1">A late admission fine of Rs. {lateFineAmount} has been added to your fees structure because the registration deadline ({new Date(lateFineSettings.deadline).toLocaleString()}) has passed.</p>
+                          <p className="text-sm mt-1">A late admission fine of Rs. {lateFineAmount} has been added to your fees structure because the registration deadline ({lateFineSettings?.senior?.[`${selectedYear}_${selectedCourse}`]?.deadline ? new Date(lateFineSettings.senior[`${selectedYear}_${selectedCourse}`].deadline).toLocaleString() : ''}) has passed.</p>
                         </div>
                       </div>
                     )}

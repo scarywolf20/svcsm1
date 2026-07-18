@@ -61,6 +61,33 @@ const ALL_TARGETS = [
   { value: 'hybrid.junior', label: 'Junior Hybrid Mode', group: 'Hybrid' },
 ];
 
+const DEFAULT_LATE_FINES = {
+  senior: {
+    FY_BBA: { enabled: false, deadline: '', amount: 0 },
+    FY_BCA: { enabled: false, deadline: '', amount: 0 },
+    FY_BCOM: { enabled: false, deadline: '', amount: 0 },
+    FY_BA: { enabled: false, deadline: '', amount: 0 },
+    SY_BBA: { enabled: false, deadline: '', amount: 0 },
+    SY_BCA: { enabled: false, deadline: '', amount: 0 },
+    SY_BCOM: { enabled: false, deadline: '', amount: 0 },
+    SY_BA: { enabled: false, deadline: '', amount: 0 },
+    TY_BBA: { enabled: false, deadline: '', amount: 0 },
+    TY_BCA: { enabled: false, deadline: '', amount: 0 },
+    TY_BCOM: { enabled: false, deadline: '', amount: 0 },
+    TY_BA: { enabled: false, deadline: '', amount: 0 },
+  },
+  junior: {
+    '11th_Science': { enabled: false, deadline: '', amount: 0 },
+    '11th_Commerce': { enabled: false, deadline: '', amount: 0 },
+    '11th_Arts': { enabled: false, deadline: '', amount: 0 },
+    '11th_CET': { enabled: false, deadline: '', amount: 0 },
+    '12th_Science': { enabled: false, deadline: '', amount: 0 },
+    '12th_Commerce': { enabled: false, deadline: '', amount: 0 },
+    '12th_Arts': { enabled: false, deadline: '', amount: 0 },
+    '12th_CET': { enabled: false, deadline: '', amount: 0 },
+  }
+};
+
 const AdminAdmissionControl = () => {
   const { success, error: toastError } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +96,43 @@ const AdminAdmissionControl = () => {
   const [schedules, setSchedules] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newSchedule, setNewSchedule] = useState({ target: '', action: false, at: '' });
-  const [lateFine, setLateFine] = useState({ enabled: false, amount: 0, deadline: '' });
+  const [lateFines, setLateFines] = useState(DEFAULT_LATE_FINES);
+  const [bulkAmount, setBulkAmount] = useState('');
+  const [bulkDeadline, setBulkDeadline] = useState('');
+
+  const handleBulkApply = () => {
+    if (!bulkAmount && !bulkDeadline) {
+      toastError('Bulk Apply Error', 'Please specify a default amount or deadline to apply.');
+      return;
+    }
+    setLateFines(prev => {
+      const updated = {
+        senior: { ...prev.senior },
+        junior: { ...prev.junior },
+      };
+      
+      // Update senior
+      Object.keys(updated.senior).forEach(key => {
+        updated.senior[key] = {
+          enabled: true,
+          amount: bulkAmount ? Number(bulkAmount) : prev.senior[key].amount,
+          deadline: bulkDeadline ? bulkDeadline : prev.senior[key].deadline,
+        };
+      });
+      
+      // Update junior
+      Object.keys(updated.junior).forEach(key => {
+        updated.junior[key] = {
+          enabled: true,
+          amount: bulkAmount ? Number(bulkAmount) : prev.junior[key].amount,
+          deadline: bulkDeadline ? bulkDeadline : prev.junior[key].deadline,
+        };
+      });
+      
+      return updated;
+    });
+    success('Bulk Apply Success', 'Default fine settings copied to all categories! Remember to click "Save Changes" at the top.');
+  };
 
   const docRef = useMemo(() => doc(db, 'siteContent', 'admissionStatus'), []);
 
@@ -90,13 +153,11 @@ const AdminAdmissionControl = () => {
           hybrid: { ...DEFAULT_STATUS.hybrid, ...(data.hybrid || {}) },
         };
         const initialSchedules = data.schedules || [];
-        if (data.lateFine) {
-          setLateFine({
-            enabled: data.lateFine.enabled ?? false,
-            amount: data.lateFine.amount ?? 0,
-            deadline: data.lateFine.deadline ?? '',
-          });
-        }
+        const initialLateFines = {
+          senior: { ...DEFAULT_LATE_FINES.senior, ...(data.lateFines?.senior || {}) },
+          junior: { ...DEFAULT_LATE_FINES.junior, ...(data.lateFines?.junior || {}) },
+        };
+        setLateFines(initialLateFines);
         
         // Auto-apply past schedules on initial load too
         const now = new Date();
@@ -240,7 +301,7 @@ const AdminAdmissionControl = () => {
         junior: updatedStatus.junior,
         hybrid: updatedStatus.hybrid,
         schedules: remaining,
-        lateFine: lateFine,
+        lateFines: lateFines,
         updatedAt: serverTimestamp(),
       }, { merge: true });
 
@@ -478,59 +539,213 @@ const AdminAdmissionControl = () => {
       {/* Late Fine Configuration Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-          <h3 className="font-bold text-gray-800 text-lg">Late Fine Configuration</h3>
-          <p className="text-sm text-gray-500 mt-1">Configure admission late fine deadline and amount. Click "Save Changes" at the top to apply.</p>
+          <h3 className="font-bold text-gray-800 text-lg">Late Fine Configuration (Stream/Course-Wise)</h3>
+          <p className="text-sm text-gray-500 mt-1">Configure admission late fine deadline and amount for each course/stream. Click "Save Changes" at the top to apply.</p>
         </div>
-        <div className="p-6 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-5 rounded-xl border-2 border-gray-100 bg-gray-50/30">
-            <div className="space-y-1">
-              <p className="font-bold text-gray-800 text-lg">Late Registration Fine</p>
-              <p className={`text-sm font-medium ${lateFine.enabled ? 'text-green-600' : 'text-red-500'}`}>
-                {lateFine.enabled ? 'Active (Will apply after deadline)' : 'Inactive'}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setLateFine(prev => ({ ...prev, enabled: !prev.enabled }))}
-              className="group"
-              title={lateFine.enabled ? 'Click to disable' : 'Click to enable'}
-            >
-              {lateFine.enabled ? (
-                <ToggleRight className="w-12 h-12 text-green-500 transition-colors group-hover:text-green-600" />
-              ) : (
-                <ToggleLeft className="w-12 h-12 text-gray-300 transition-colors group-hover:text-gray-400" />
-              )}
-            </button>
-          </div>
-
-          {lateFine.enabled && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 rounded-xl border border-gray-100 bg-white">
+        <div className="p-6 space-y-8">
+          {/* Bulk Apply Bar */}
+          <div className="p-5 rounded-xl border border-blue-100 bg-blue-50/30">
+            <h4 className="font-bold text-gray-700 text-sm mb-3">⚡ Bulk Pre-fill Tool</h4>
+            <p className="text-xs text-gray-500 mb-4">Quickly set a default fine amount and deadline across all Senior & Junior courses, then customize individually below.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                  Fine Amount (in Rs.)
-                </label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Default Amount (Rs.)</label>
                 <input
                   type="number"
-                  value={lateFine.amount || ''}
-                  onChange={(e) => setLateFine(prev => ({ ...prev, amount: Number(e.target.value) || 0 }))}
+                  value={bulkAmount}
+                  onChange={(e) => setBulkAmount(e.target.value)}
                   placeholder="e.g. 500"
-                  className="w-full p-3 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
-                  min="0"
+                  className="w-full p-2.5 border-2 border-gray-200 rounded-lg text-sm bg-white outline-none focus:border-blue-400"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-                  Deadline Date & Time
-                </label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Default Deadline</label>
                 <input
                   type="datetime-local"
-                  value={lateFine.deadline || ''}
-                  onChange={(e) => setLateFine(prev => ({ ...prev, deadline: e.target.value }))}
-                  className="w-full p-3 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
+                  value={bulkDeadline}
+                  onChange={(e) => setBulkDeadline(e.target.value)}
+                  className="w-full p-2.5 border-2 border-gray-200 rounded-lg text-sm bg-white outline-none focus:border-blue-400"
                 />
               </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={handleBulkApply}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition-colors shadow-sm"
+                >
+                  Apply to All Categories
+                </button>
+              </div>
             </div>
-          )}
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            {/* Senior College Table */}
+            <div className="space-y-4">
+              <div className="border-b pb-2">
+                <h4 className="font-bold text-gray-800 text-base">Senior College Fines</h4>
+                <p className="text-xs text-gray-500 mt-0.5">FY / SY / TY — BBA, BCA, B.Com, BA</p>
+              </div>
+              <div className="overflow-x-auto max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200 sticky top-0">
+                      <th className="p-3 font-bold uppercase tracking-wider text-gray-400">Course / Year</th>
+                      <th className="p-3 font-bold uppercase tracking-wider text-gray-400 text-center">Status</th>
+                      <th className="p-3 font-bold uppercase tracking-wider text-gray-400">Amount (Rs.)</th>
+                      <th className="p-3 font-bold uppercase tracking-wider text-gray-400">Deadline</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-150 bg-white">
+                    {SENIOR_YEARS.flatMap((year) =>
+                      SENIOR_COURSES.map((course) => {
+                        const key = `${year}_${course}`;
+                        const cfg = lateFines.senior?.[key] || { enabled: false, deadline: '', amount: 0 };
+                        return (
+                          <tr key={key} className="hover:bg-gray-50/50">
+                            <td className="p-3 font-bold text-gray-700">{year} {COURSE_LABELS[course]}</td>
+                            <td className="p-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setLateFines(prev => {
+                                    const updated = { ...prev, senior: { ...prev.senior } };
+                                    updated.senior[key] = { ...cfg, enabled: !cfg.enabled };
+                                    return updated;
+                                  });
+                                }}
+                                className="inline-block align-middle"
+                              >
+                                {cfg.enabled ? (
+                                  <ToggleRight className="w-8 h-8 text-green-500" />
+                                ) : (
+                                  <ToggleLeft className="w-8 h-8 text-gray-300" />
+                                )}
+                              </button>
+                            </td>
+                            <td className="p-3">
+                              <input
+                                type="number"
+                                disabled={!cfg.enabled}
+                                value={cfg.amount || ''}
+                                onChange={(e) => {
+                                  setLateFines(prev => {
+                                    const updated = { ...prev, senior: { ...prev.senior } };
+                                    updated.senior[key] = { ...cfg, amount: Number(e.target.value) || 0 };
+                                    return updated;
+                                  });
+                                }}
+                                placeholder="e.g. 500"
+                                className="w-20 p-1.5 border border-gray-300 rounded text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-400"
+                              />
+                            </td>
+                            <td className="p-3">
+                              <input
+                                type="datetime-local"
+                                disabled={!cfg.enabled}
+                                value={cfg.deadline || ''}
+                                onChange={(e) => {
+                                  setLateFines(prev => {
+                                    const updated = { ...prev, senior: { ...prev.senior } };
+                                    updated.senior[key] = { ...cfg, deadline: e.target.value };
+                                    return updated;
+                                  });
+                                }}
+                                className="p-1.5 border border-gray-300 rounded text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-400"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Junior College Table */}
+            <div className="space-y-4">
+              <div className="border-b pb-2">
+                <h4 className="font-bold text-gray-800 text-base">Junior College Fines</h4>
+                <p className="text-xs text-gray-500 mt-0.5">11th & 12th — Science, Commerce, Arts, CET</p>
+              </div>
+              <div className="overflow-x-auto max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200 sticky top-0">
+                      <th className="p-3 font-bold uppercase tracking-wider text-gray-400">Class / Stream</th>
+                      <th className="p-3 font-bold uppercase tracking-wider text-gray-400 text-center">Status</th>
+                      <th className="p-3 font-bold uppercase tracking-wider text-gray-400">Amount (Rs.)</th>
+                      <th className="p-3 font-bold uppercase tracking-wider text-gray-400">Deadline</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-150 bg-white">
+                    {JUNIOR_STANDARDS.flatMap((std) =>
+                      JUNIOR_STREAMS.map((stream) => {
+                        const key = `${std}_${stream}`;
+                        const cfg = lateFines.junior?.[key] || { enabled: false, deadline: '', amount: 0 };
+                        return (
+                          <tr key={key} className="hover:bg-gray-50/50">
+                            <td className="p-3 font-bold text-gray-700">{std} {stream}</td>
+                            <td className="p-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setLateFines(prev => {
+                                    const updated = { ...prev, junior: { ...prev.junior } };
+                                    updated.junior[key] = { ...cfg, enabled: !cfg.enabled };
+                                    return updated;
+                                  });
+                                }}
+                                className="inline-block align-middle"
+                              >
+                                {cfg.enabled ? (
+                                  <ToggleRight className="w-8 h-8 text-green-500" />
+                                ) : (
+                                  <ToggleLeft className="w-8 h-8 text-gray-300" />
+                                )}
+                              </button>
+                            </td>
+                            <td className="p-3">
+                              <input
+                                type="number"
+                                disabled={!cfg.enabled}
+                                value={cfg.amount || ''}
+                                onChange={(e) => {
+                                  setLateFines(prev => {
+                                    const updated = { ...prev, junior: { ...prev.junior } };
+                                    updated.junior[key] = { ...cfg, amount: Number(e.target.value) || 0 };
+                                    return updated;
+                                  });
+                                }}
+                                placeholder="e.g. 500"
+                                className="w-20 p-1.5 border border-gray-300 rounded text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-400"
+                              />
+                            </td>
+                            <td className="p-3">
+                              <input
+                                type="datetime-local"
+                                disabled={!cfg.enabled}
+                                value={cfg.deadline || ''}
+                                onChange={(e) => {
+                                  setLateFines(prev => {
+                                    const updated = { ...prev, junior: { ...prev.junior } };
+                                    updated.junior[key] = { ...cfg, deadline: e.target.value };
+                                    return updated;
+                                  });
+                                }}
+                                className="p-1.5 border border-gray-300 rounded text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-400"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

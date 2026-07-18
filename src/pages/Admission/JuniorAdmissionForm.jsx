@@ -28,8 +28,8 @@ const JuniorAdmissionForm = () => {
         const snap = await getDoc(doc(db, 'siteContent', 'admissionStatus'));
         if (!ignore && snap.exists()) {
           const data = snap.data();
-          if (data.lateFine) {
-            setLateFineSettings(data.lateFine);
+          if (data.lateFines) {
+            setLateFineSettings(data.lateFines);
           }
           // Apply any past-due schedules client-side
           const now = new Date();
@@ -59,9 +59,12 @@ const JuniorAdmissionForm = () => {
   }, []);
 
   const getLateFineAmount = () => {
-    if (lateFineSettings?.enabled && lateFineSettings?.deadline && lateFineSettings?.amount) {
-      if (new Date() > new Date(lateFineSettings.deadline)) {
-        return Number(lateFineSettings.amount) || 0;
+    if (selectedStandard && selectedStream && lateFineSettings?.junior) {
+      const config = lateFineSettings.junior[`${selectedStandard}_${selectedStream}`];
+      if (config?.enabled && config?.deadline && config?.amount) {
+        if (new Date() > new Date(config.deadline)) {
+          return Number(config.amount) || 0;
+        }
       }
     }
     return 0;
@@ -506,7 +509,7 @@ const DigitBoxes = ({ name, count, label }) => {
                       <div className="mb-5 p-4 rounded-lg bg-red-50 border-l-4 border-red-500 text-red-800 flex items-center justify-between">
                         <div>
                           <p className="font-bold">⚠️ Late Registration Fine Applied</p>
-                          <p className="text-sm mt-1">A late admission fine of Rs. {lateFineAmount} has been added to your fees structure because the registration deadline ({new Date(lateFineSettings.deadline).toLocaleString()}) has passed.</p>
+                          <p className="text-sm mt-1">A late admission fine of Rs. {lateFineAmount} has been added to your fees structure because the registration deadline ({lateFineSettings?.junior?.[`${selectedStandard}_${selectedStream}`]?.deadline ? new Date(lateFineSettings.junior[`${selectedStandard}_${selectedStream}`].deadline).toLocaleString() : ''}) has passed.</p>
                         </div>
                       </div>
                     )}
